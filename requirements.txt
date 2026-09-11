@@ -1,0 +1,15 @@
+# Core Computer Vision & Deep Learning
+opencv-python>=4.6.0
+numpy>=1.23.0
+pillow>=9.0.0
+
+# Audio Processing & Acoustic Cry Classification
+soundfile>=0.12.0
+librosa>=0.10.0
+scikit-learn>=1.2.0
+joblib>=1.2.0
+
+# Backend Web Server & REST API
+flask>=2.2.0
+flask-cors>=3.0.0
+requests>=2.28.0

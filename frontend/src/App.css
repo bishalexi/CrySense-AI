@@ -1,0 +1,132 @@
+// Imports
+import ___CSS_LOADER_API_SOURCEMAP_IMPORT___ from "../node_modules/css-loader/dist/runtime/sourceMaps.js";
+import ___CSS_LOADER_API_IMPORT___ from "../node_modules/css-loader/dist/runtime/api.js";
+var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOURCEMAP_IMPORT___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `.App {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 55%, #000000 100%);
+  color: #e2e8f0;
+  overflow-x: hidden;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.content-wrap {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+.grid-main {
+  flex: 1 1;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.col-left, .col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.65));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.card-subtle {
+  font-size: 0.72rem;
+  color: #64748b;
+  letter-spacing: 0.14em;
+}
+
+.dot-cyan {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00d4ff;
+  box-shadow: 0 0 12px #00d4ff, 0 0 4px #00d4ff;
+  display: inline-block;
+}
+
+.btn-mini {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: linear-gradient(180deg, rgba(51, 65, 85, 0.65), rgba(30, 41, 59, 0.65));
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.btn-mini:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.foot {
+  padding: 14px 32px;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(2, 6, 23, 0.5);
+  backdrop-filter: blur(10px);
+  color: #64748b;
+  font-size: 0.78rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 3;
+}
+.foot strong { color: #94a3b8; font-weight: 600; }
+
+@media (max-width: 1024px) {
+  .grid-main { grid-template-columns: 1fr; padding: 20px 18px; }
+  .foot { flex-direction: column; gap: 8px; text-align: center; padding: 14px 18px; }
+}
+`, "",{"version":3,"sources":["webpack://./src/App.css"],"names":[],"mappings":"AAAA;EACE,iBAAiB;EACjB,kFAAkF;EAClF,cAAc;EACd,kBAAkB;AACpB;;AAEA;EACE,kBAAkB;EAClB,iBAAiB;EACjB,WAAW;AACb;;AAEA;EACE,kBAAkB;EAClB,UAAU;EACV,iBAAiB;EACjB,aAAa;EACb,sBAAsB;AACxB;;AAEA;EACE,uDAAuD;AACzD;;AAEA;EACE,SAAO;EACP,aAAa;EACb,gCAAgC;EAChC,SAAS;EACT,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;EACd,WAAW;EACX,sBAAsB;AACxB;;AAEA;EACE,aAAa;EACb,sBAAsB;EACtB,SAAS;AACX;;AAEA;EACE,mFAAmF;EACnF,2CAA2C;EAC3C,mBAAmB;EACnB,0CAA0C;EAC1C,kDAAkD;EAClD,oFAAoF;EACpF,gBAAgB;EAChB,4BAA4B;AAC9B;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,8BAA8B;EAC9B,kBAAkB;EAClB,kDAAkD;EAClD,kCAAkC;AACpC;;AAEA;EACE,oBAAoB;EACpB,mBAAmB;EACnB,SAAS;EACT,kBAAkB;EAClB,gBAAgB;EAChB,cAAc;AAChB;;AAEA;EACE,kBAAkB;EAClB,cAAc;EACd,sBAAsB;AACxB;;AAEA;EACE,UAAU;EACV,WAAW;EACX,kBAAkB;EAClB,mBAAmB;EACnB,6CAA6C;EAC7C,qBAAqB;AACvB;;AAEA;EACE,iBAAiB;EACjB,mBAAmB;EACnB,2CAA2C;EAC3C,mFAAmF;EACnF,cAAc;EACd,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,gFAAgF;EAChF,mFAAmF;AACrF;AACA;EACE,2BAA2B;EAC3B,qCAAqC;EACrC,kFAAkF;AACpF;;AAEA;EACE,kBAAkB;EAClB,8CAA8C;EAC9C,+BAA+B;EAC/B,2BAA2B;EAC3B,cAAc;EACd,kBAAkB;EAClB,aAAa;EACb,8BAA8B;EAC9B,mBAAmB;EACnB,UAAU;AACZ;AACA,eAAe,cAAc,EAAE,gBAAgB,EAAE;;AAEjD;EACE,aAAa,0BAA0B,EAAE,kBAAkB,EAAE;EAC7D,QAAQ,sBAAsB,EAAE,QAAQ,EAAE,kBAAkB,EAAE,kBAAkB,EAAE;AACpF","sourcesContent":[".App {\n  min-height: 100vh;\n  background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 55%, #000000 100%);\n  color: #e2e8f0;\n  overflow-x: hidden;\n}\n\n.app-shell {\n  position: relative;\n  min-height: 100vh;\n  width: 100%;\n}\n\n.content-wrap {\n  position: relative;\n  z-index: 2;\n  min-height: 100vh;\n  display: flex;\n  flex-direction: column;\n}\n\n.mono {\n  font-family: 'JetBrains Mono', 'Courier New', monospace;\n}\n\n.grid-main {\n  flex: 1;\n  display: grid;\n  grid-template-columns: 1.4fr 1fr;\n  gap: 20px;\n  padding: 24px 32px;\n  max-width: 1400px;\n  margin: 0 auto;\n  width: 100%;\n  box-sizing: border-box;\n}\n\n.col-left, .col-right {\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n}\n\n.glass-card {\n  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.65));\n  border: 1px solid rgba(148, 163, 184, 0.14);\n  border-radius: 16px;\n  backdrop-filter: blur(14px) saturate(140%);\n  -webkit-backdrop-filter: blur(14px) saturate(140%);\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);\n  overflow: hidden;\n  transform-style: preserve-3d;\n}\n\n.card-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 14px 20px;\n  border-bottom: 1px solid rgba(148, 163, 184, 0.08);\n  background: rgba(15, 23, 42, 0.35);\n}\n\n.card-title {\n  display: inline-flex;\n  align-items: center;\n  gap: 10px;\n  font-size: 0.92rem;\n  font-weight: 600;\n  color: #e2e8f0;\n}\n\n.card-subtle {\n  font-size: 0.72rem;\n  color: #64748b;\n  letter-spacing: 0.14em;\n}\n\n.dot-cyan {\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n  background: #00d4ff;\n  box-shadow: 0 0 12px #00d4ff, 0 0 4px #00d4ff;\n  display: inline-block;\n}\n\n.btn-mini {\n  padding: 8px 16px;\n  border-radius: 10px;\n  border: 1px solid rgba(148, 163, 184, 0.25);\n  background: linear-gradient(180deg, rgba(51, 65, 85, 0.65), rgba(30, 41, 59, 0.65));\n  color: #e2e8f0;\n  font-size: 0.8rem;\n  cursor: pointer;\n  font-weight: 500;\n  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;\n  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);\n}\n.btn-mini:hover {\n  transform: translateY(-2px);\n  border-color: rgba(56, 189, 248, 0.5);\n  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);\n}\n\n.foot {\n  padding: 14px 32px;\n  border-top: 1px solid rgba(148, 163, 184, 0.1);\n  background: rgba(2, 6, 23, 0.5);\n  backdrop-filter: blur(10px);\n  color: #64748b;\n  font-size: 0.78rem;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  z-index: 3;\n}\n.foot strong { color: #94a3b8; font-weight: 600; }\n\n@media (max-width: 1024px) {\n  .grid-main { grid-template-columns: 1fr; padding: 20px 18px; }\n  .foot { flex-direction: column; gap: 8px; text-align: center; padding: 14px 18px; }\n}\n"],"sourceRoot":""}]);
+// Exports
+___CSS_LOADER_EXPORT___.locals = {};
+export default ___CSS_LOADER_EXPORT___;

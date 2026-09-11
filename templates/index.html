@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BabyCry AI & Face Emotion | Multimodal Infant Distress Monitor</title>
+    <meta name="description" content="Multimodal Infant Distress Monitoring combining Ultra-Lightweight Face Detection (Slim 320) with Deep Acoustic Cry Classification.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #07090e;
+            --bg-secondary: #0f141f;
+            --bg-card: rgba(18, 24, 38, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 212, 255, 0.3);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent-cyan: #00d4ff;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 10% 15%, rgba(0, 212, 255, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 90% 85%, rgba(239, 68, 68, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: rgba(15, 20, 31, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #00d4ff 0%, #ef4444 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.35);
+            font-size: 1.3rem;
+        }
+
+        .brand-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #ffffff, #67e8f9, #fca5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .badges-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-video {
+            background: rgba(0, 212, 255, 0.12);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #38bdf8;
+        }
+
+        .badge-audio {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .dot-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+
+        main {
+            flex: 1;
+            max-width: 1520px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 24px 32px 40px;
+            display: grid;
+            grid-template-columns: 1fr 480px;
+            gap: 24px;
+        }
+
+        @media (max-width: 1180px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .left-column, .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .card-header {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(10, 14, 22, 0.6);
+        }
+
+        .card-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e2e8f0;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-stream {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* Unified Multimodal Distress Card */
+        .distress-hero {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(18, 24, 38, 0.4) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .distress-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .distress-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .distress-score-display {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+        }
+
+        .distress-big-number {
+            font-size: 3.2rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            line-height: 1;
+            color: #ef4444;
+            text-shadow: 0 0 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .distress-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .distress-label {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .distress-modality {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .gauge-track {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            transition: width 0.4s ease;
+        }
+
+        .distress-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .breakdown-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .breakdown-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .breakdown-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: #e2e8f0;
+        }
+
+        /* Baby Voice Speech Bubble */
+        .baby-message-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .baby-bubble-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .baby-bubble-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #c084fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .btn-speak {
+            background: rgba(168, 85, 247, 0.2);
+            color: #e9d5ff;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-speak:hover {
+            background: rgba(168, 85, 247, 0.35);
+            transform: scale(1.03);
+        }
+
+        .baby-quote {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #f3e8ff;
+            font-style: italic;
+            position: relative;
+            padding-left: 14px;
+            border-left: 3px solid #a855f7;
+        }
+
+        /* Audio Controls & Archetypes */
+        .audio-section-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .archetypes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .btn-archetype {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-archetype:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-archetype.active {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .archetype-icon {
+            font-size: 1.4rem;
+        }
+
+        .mic-bar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-mic {
+            flex: 1;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-mic:hover {
+            box-shadow: 0 6px 22px rgba(239, 68, 68, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-mic.recording {
+            animation: pulse-red 1s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            from { box-shadow: 0 0 10px #ef4444; }
+            to { box-shadow: 0 0 25px #ef4444; }
+        }
+
+        /* Caregiver Checklist */
+        .checklist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-cyan);
+            font-size: 0.84rem;
+            line-height: 1.4;
+            color: #cbd5e1;
+        }
+
+        /* Emotion Spectrum */
+        .bars-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bar-row {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .bar-val {
+            height: 100%;
+            width: 0%;
+            border-radius: 9999px;
+            transition: width 0.25s ease;
+        }
+
+        /* Drag & Drop */
+        .dropzone {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 18px 16px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+
+        .dropzone:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        #fileInput, #audioFileInput {
+            display: none;
+        }
+
+        footer {
+            padding: 16px 32px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(10, 14, 22, 0.6);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <div class="brand-icon">👶</div>
+            <div class="brand-title">
+                <h1>Multimodal Infant Distress Monitor</h1>
+                <div class="brand-subtitle">Face Emotion AI (Slim 320) + BabyCry AI Acoustics</div>
+            </div>
+        </div>
+
+        <div class="badges-group">
+            <div class="status-badge badge-video">
+                <div class="dot-pulse" style="background: #38bdf8;"></div>
+                <span>VISION ACTIVE</span>
+            </div>
+            <div class="status-badge badge-audio">
+                <div class="dot-pulse" style="background: #ef4444;"></div>
+                <span>ACOUSTIC ACTIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Left: Video Feed & Visual Analysis -->
+        <section class="left-column">
+            <div class="glass-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #00d4ff;"></span>
+                        <span>Infant Video Feed & Targeting HUD</span>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+                        Slim 320 SSD (320x240) + FERPlus
+                    </span>
+                </div>
+
+                <div class="video-wrapper">
+                    <img id="videoFeed" class="video-stream" src="/video_feed" alt="Infant Video Feed">
+                </div>
+
+                <div style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); border-top: 1px solid var(--border-color);">
+                    <div style="display: flex; gap: 16px; font-size: 0.82rem; font-family: var(--font-mono); color: #94a3b8;">
+                        <span>FPS: <strong id="valFPS" style="color: #38bdf8;">0.0</strong></span>
+                        <span>Faces: <strong id="valFaces" style="color: #fff;">0</strong></span>
+                        <span>Facial Affect: <strong id="valEmotion" style="color: #34d399;">Neutral</strong></span>
+                    </div>
+                    <button class="btn-speak" onclick="document.getElementById('fileInput').click()" style="padding: 6px 14px; border-radius: 8px;">
+                        Upload Face Photo
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" onchange="uploadImage(this.files[0])">
+                </div>
+            </div>
+
+            <!-- Facial Emotion Spectrum -->
+            <div class="glass-card" style="padding: 18px 20px;">
+                <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between;">
+                    <span>Facial Emotion Spectrum (Visual Tension)</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">FERPLUS (8 CLASSES)</span>
+                </div>
+                <div class="bars-container" id="visualBars">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Multimodal Fusion & Baby Cry Acoustics -->
+        <aside class="right-column">
+            <!-- Unified Distress Gauge Card -->
+            <div class="distress-hero" id="distressHero">
+                <div class="distress-top-row">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #cbd5e1; letter-spacing: 0.04em;">MULTIMODAL DISTRESS ASSESSMENT</span>
+                    <span class="distress-badge" id="distressBadge">LOW DISTRESS</span>
+                </div>
+
+                <div class="distress-score-display">
+                    <div class="distress-big-number" id="distressScore">12%</div>
+                    <div class="distress-meta">
+                        <div class="distress-label" id="distressLabel">Calm & Content</div>
+                        <div class="distress-modality" id="distressModality">Awaiting Telemetry</div>
+                    </div>
+                </div>
+
+                <div class="gauge-track">
+                    <div class="gauge-fill" id="gaugeFill" style="width: 12%;"></div>
+                </div>
+
+                <div class="distress-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Visual Strain (Face)</span>
+                        <span class="breakdown-val" id="visualStrain">15.0%</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Acoustic Cry Severity</span>
+                        <span class="breakdown-val" id="audioStrain">0.0%</span>
+                    </div>
+                </div>
+
+                <p id="distressNarrative" style="font-size: 0.82rem; color: #94a3b8; line-height: 1.4; margin-top: 4px;">
+                    Monitoring infant video and audio telemetry in real time.
+                </p>
+            </div>
+
+            <!-- Baby Voice Translation Bubble -->
+            <div class="baby-message-card">
+                <div class="baby-bubble-header">
+                    <div class="baby-bubble-title">
+                        <span>💬</span>
+                        <span>Baby's Inner Voice Translation</span>
+                    </div>
+                    <button class="btn-speak" id="btnSpeak" onclick="speakBabyMessage()">
+                        🔊 Listen
+                    </button>
+                </div>
+                <div class="baby-quote" id="babyMessage">
+                    "I am feeling calm, peaceful, and comfortable right now with you, Mommy and Daddy!"
+                </div>
+            </div>
+
+            <!-- Acoustic Cry Control Center -->
+            <div class="glass-card audio-section-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-title">
+                        <span style="font-size: 1.1rem;">🎙️</span>
+                        <span>Acoustic Baby Cry Classifier</span>
+                    </div>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">194-DIM ACOUSTIC SVC</span>
+                </div>
+
+                <div class="mic-bar">
+                    <button class="btn-mic" id="btnMicRecord" onclick="toggleMicRecording()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        <span id="micBtnText">Record Cry via Mic (3s)</span>
+                    </button>
+                    <button class="btn-speak" onclick="document.getElementById('audioFileInput').click()" style="padding: 11px 16px; border-radius: 10px;">
+                        Upload Audio
+                    </button>
+                    <input type="file" id="audioFileInput" accept="audio/*" onchange="uploadAudio(this.files[0])">
+                </div>
+
+                <!-- Instant Archetype Samples -->
+                <div>
+                    <div style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
+                        Test Archetype Cry Samples:
+                    </div>
+                    <div class="archetypes-grid" id="archetypesGrid">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caregiver Action Protocol Checklist -->
+            <div class="glass-card" style="padding: 20px;">
+                <div class="card-title" style="margin-bottom: 12px;">
+                    <span>🩺</span>
+                    <span>Pediatric Caregiver Soothing Protocol</span>
+                </div>
+                <div class="checklist-container" id="checklistContainer">
+                    <div class="checklist-item">Verify infant feeding schedule and wake window duration.</div>
+                    <div class="checklist-item">Check diaper comfort, clothing tightness, and neck temperature.</div>
+                    <div class="checklist-item">Offer skin-to-skin holding and rhythmic gentle swaying.</div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <footer>
+        <div>Multimodal AI: <strong>Ultra-Lightweight Face Detection (Slim 320)</strong> + <strong>BabyCry AI Classifier</strong></div>
+        <div>Inference: OpenCV DNN AVX2 + Librosa 194-Dim Spectral Analysis</div>
+    </footer>
+
+    <script>
+        const VISUAL_EMOTIONS = [
+            { name: "Happy", color: "#10b981", emoji: "😊" },
+            { name: "Neutral", color: "#94a3b8", emoji: "😐" },
+            { name: "Surprise", color: "#f59e0b", emoji: "😲" },
+            { name: "Sad", color: "#38bdf8", emoji: "😢" },
+            { name: "Angry", color: "#f43f5e", emoji: "😡" },
+            { name: "Disgust", color: "#14b8a6", emoji: "🤢" },
+            { name: "Fear", color: "#a855f7", emoji: "😨" },
+            { name: "Contempt", color: "#ec4899", emoji: "😏" }
+        ];
+
+        // Initialize Visual Bars
+        const vContainer = document.getElementById("visualBars");
+        VISUAL_EMOTIONS.forEach(emo => {
+            const row = document.createElement("div");
+            row.className = "bar-row";
+            row.innerHTML = `
+                <div class="bar-labels">
+                    <span>${emo.emoji} ${emo.name}</span>
+                    <span id="vpct-${emo.name}" style="font-family: var(--font-mono); color: var(--text-muted);">0.0%</span>
+                </div>
+                <div class="bar-bg">
+                    <div class="bar-val" id="vfill-${emo.name}" style="background-color: ${emo.color}; width: 0%;"></div>
+                </div>
+            `;
+            vContainer.appendChild(row);
+        });
+
+        // Load Preset Archetype Audio Samples
+        async function loadArchetypes() {
+            try {
+                const res = await fetch('/api/sample_audios');
+                if (!res.ok) return;
+                const samples = await res.json();
+                const grid = document.getElementById('archetypesGrid');
+                grid.innerHTML = '';
+
+                samples.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-archetype';
+                    btn.id = `btn-arch-${s.id}`;
+                    btn.innerHTML = `
+                        <span class="archetype-icon">${s.icon}</span>
+                        <span>${s.name}</span>
+                    `;
+                    btn.onclick = () => triggerSample(s.id);
+                    grid.appendChild(btn);
+                });
+            } catch (e) {
+                console.error("Error loading archetypes", e);
+            }
+        }
+        loadArchetypes();
+
+        // Polling Telemetry
+        async function fetchTelemetry() {
+            try {
+                const res = await fetch('/api/telemetry');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                // Visual metrics
+                if (data.visual) {
+                    document.getElementById('valFPS').textContent = data.visual.fps.toFixed(1);
+                    document.getElementById('valFaces').textContent = data.visual.faces_count;
+                    document.getElementById('valEmotion').textContent = data.visual.dominant_emotion;
+
+                    VISUAL_EMOTIONS.forEach(emo => {
+                        const val = (data.visual.probabilities && data.visual.probabilities[emo.name]) || 0;
+                        const fillEl = document.getElementById(`vfill-${emo.name}`);
+                        const pctEl = document.getElementById(`vpct-${emo.name}`);
+                        if (fillEl && pctEl) {
+                            fillEl.style.width = val.toFixed(1) + "%";
+                            pctEl.textContent = val.toFixed(1) + "%";
+                        }
+                    });
+                }
+
+                // Fused metrics
+                if (data.fused) {
+                    const f = data.fused;
+                    document.getElementById('distressScore').textContent = f.unified_distress_score + "%";
+                    document.getElementById('distressScore').style.color = f.severity_color;
+                    document.getElementById('distressLabel').textContent = f.severity_label;
+                    document.getElementById('distressBadge').textContent = f.severity_badge;
+                    document.getElementById('distressBadge').style.borderColor = f.severity_color;
+                    document.getElementById('distressBadge').style.color = f.severity_color;
+                    document.getElementById('distressModality').textContent = f.modality_used;
+                    document.getElementById('gaugeFill').style.width = f.unified_distress_score + "%";
+
+                    if (f.visual_distress_score !== null) {
+                        document.getElementById('visualStrain').textContent = f.visual_distress_score.toFixed(1) + "%";
+                    }
+                    if (f.audio_distress_score !== null) {
+                        document.getElementById('audioStrain').textContent = f.audio_distress_score.toFixed(1) + "%";
+                    }
+                    if (f.narrative) {
+                        document.getElementById('distressNarrative').textContent = f.narrative;
+                    }
+                    if (f.baby_message) {
+                        document.getElementById('babyMessage').textContent = `"${f.baby_message}"`;
+                    }
+
+                    // Checklist
+                    if (f.soothing_checklist && f.soothing_checklist.length > 0) {
+                        const cContainer = document.getElementById('checklistContainer');
+                        cContainer.innerHTML = '';
+                        f.soothing_checklist.forEach(step => {
+                            const div = document.createElement('div');
+                            div.className = 'checklist-item';
+                            div.textContent = step;
+                            cContainer.appendChild(div);
+                        });
+                    }
+                }
+            } catch (e) {}
+        }
+        setInterval(fetchTelemetry, 350);
+
+        // Trigger an Archetype Sample
+        async function triggerSample(sampleId) {
+            document.querySelectorAll('.btn-archetype').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-arch-${sampleId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Play audio preview
+            const audio = new Audio(`/audio_samples/${sampleId}`);
+            audio.play().catch(() => {});
+
+            // Send to classifier
+            try {
+                const res = await fetch(`/api/audio_classify?sample=${sampleId}`, { method: 'POST' });
+                if (res.ok) {
+                    fetchTelemetry();
+                }
+            } catch (e) {
+                console.error("Error triggering sample", e);
+            }
+        }
+
+        // Web Speech API (Text-to-Speech)
+        function speakBabyMessage() {
+            const text = document.getElementById('babyMessage').textContent.replace(/"/g, '');
+            if (!window.speechSynthesis) {
+                alert("Speech synthesis is not supported on this browser.");
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.pitch = 1.35; // Slightly higher pitch for baby voice
+            utter.rate = 0.95;
+            window.speechSynthesis.speak(utter);
+        }
+
+        // Microphone Recording
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        async function toggleMicRecording() {
+            const btn = document.getElementById('btnMicRecord');
+            const txt = document.getElementById('micBtnText');
+
+            if (isRecording) {
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                }
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    isRecording = false;
+                    btn.classList.remove('recording');
+                    txt.textContent = "Analyzing Cry...";
+
+                    const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const formData = new FormData();
+                    formData.append('file', blob, 'mic_recording.wav');
+
+                    try {
+                        const res = await fetch('/api/audio_classify', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        if (res.ok) fetchTelemetry();
+                    } catch (err) {
+                        console.error("Audio classification error", err);
+                    } finally {
+                        txt.textContent = "Record Cry via Mic (3s)";
+                        stream.getTracks().forEach(t => t.stop());
+                    }
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                btn.classList.add('recording');
+                txt.textContent = "Listening... (recording 3s)";
+
+                // Automatically stop after 3.2 seconds
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === "recording") {
+                        mediaRecorder.stop();
+                    }
+                }, 3200);
+            } catch (err) {
+                alert("Microphone access was denied or is unavailable: " + err.message);
+            }
+        }
+
+        async function uploadAudio(file) {
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/audio_classify', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res.ok) fetchTelemetry();
+            } catch (e) {
+                alert("Audio upload failed: " + e.message);
+            }
+        }
+
+        async function uploadImage(file) {
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (res.ok) {
+                    const blob = await res.blob();
+                    document.getElementById('videoFeed').src = URL.createObjectURL(blob);
+                }
+            } catch (e) {
+                alert("Image upload failed: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
