@@ -3040,6 +3040,101 @@ var _jsxFileName = "/app/frontend/src/components/VideoFeedCard.jsx",
 
 
 const BabyFace3D = ({ mood = 'neutral' }) => {
+  const [useBrowserCam, setUseBrowserCam] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const [feedSrc, setFeedSrc] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)('/video_feed');
+  const [snapshotMode, setSnapshotMode] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const videoRef = (0, react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const canvasRef = (0, react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const streamRef = (0, react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+
+  // Global triggers exposed for toolbar buttons
+  (0, react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    window.__toggleBrowserCamera = async () => {
+      if (useBrowserCam) {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(t => t.stop());
+          streamRef.current = null;
+        }
+        setUseBrowserCam(false);
+        setFeedSrc('/video_feed?t=' + Date.now());
+        try { await fetch('/api/set_source?source=camera'); } catch(e) {}
+      } else {
+        try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Browser camera is unavailable or requires HTTPS.');
+            return;
+          }
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+            audio: false
+          });
+          streamRef.current = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch(() => {});
+          }
+          setUseBrowserCam(true);
+        } catch(err) {
+          alert('Could not access device camera: ' + err.message);
+        }
+      }
+    };
+
+    window.__resetHostCamera = async () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+      setUseBrowserCam(false);
+      setSnapshotMode(false);
+      setFeedSrc('/video_feed?t=' + Date.now());
+      try { await fetch('/api/set_source?source=camera'); } catch(e) {}
+    };
+
+    window.__setSnapshotFeed = () => {
+      setFeedSrc('/api/snapshot?t=' + Date.now());
+    };
+
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+      }
+    };
+  }, [useBrowserCam]);
+
+  // Frame streaming loop for browser webcam -> Python Emotion AI
+  (0, react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!useBrowserCam) return;
+    const interval = setInterval(async () => {
+      if (!videoRef.current || !canvasRef.current) return;
+      const v = videoRef.current;
+      if (v.readyState < 2) return;
+      const c = canvasRef.current;
+      c.width = 640;
+      c.height = 480;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(v, 0, 0, 640, 480);
+      try {
+        const b64 = c.toDataURL('image/jpeg', 0.8);
+        await fetch('/api/upload_frame', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: b64 })
+        });
+      } catch(err) {}
+    }, 180);
+    return () => clearInterval(interval);
+  }, [useBrowserCam]);
+
+  // Smooth fallback polling if MJPEG drops
+  (0, react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (useBrowserCam || !snapshotMode) return;
+    const id = setInterval(() => {
+      setFeedSrc('/api/snapshot?t=' + Date.now());
+    }, 120);
+    return () => clearInterval(id);
+  }, [useBrowserCam, snapshotMode]);
+
   return /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
     style: {
       position: 'absolute',
@@ -3051,26 +3146,49 @@ const BabyFace3D = ({ mood = 'neutral' }) => {
       overflow: 'hidden',
       zIndex: 1
     },
-    children: /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("img", {
-      src: "/video_feed",
-      alt: "Real-Time Neural Video Feed",
-      onError: e => {
-        e.currentTarget.onerror = null;
-        setInterval(() => {
-          e.currentTarget.src = '/api/snapshot?t=' + Date.now();
-        }, 80);
-      },
-      style: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain',
-        display: 'block'
-      }
-    }, void 0, false, {
-      fileName: "VideoFeedCard.jsx",
-      lineNumber: 10,
-      columnNumber: 5
-    }, undefined)
+    children: [
+      useBrowserCam ? /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("video", {
+        ref: videoRef,
+        autoPlay: true,
+        playsInline: true,
+        muted: true,
+        style: {
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          transform: 'scaleX(-1)'
+        }
+      }, void 0, false, {
+        fileName: "VideoFeedCard.jsx",
+        lineNumber: 10,
+        columnNumber: 5
+      }, undefined) : /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("img", {
+        key: feedSrc,
+        src: feedSrc,
+        alt: "Real-Time Neural Video Feed",
+        onError: () => {
+          setSnapshotMode(true);
+        },
+        style: {
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          display: 'block'
+        }
+      }, void 0, false, {
+        fileName: "VideoFeedCard.jsx",
+        lineNumber: 11,
+        columnNumber: 5
+      }, undefined),
+      /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("canvas", {
+        ref: canvasRef,
+        style: { display: 'none' }
+      }, void 0, false, {
+        fileName: "VideoFeedCard.jsx",
+        lineNumber: 12,
+        columnNumber: 5
+      }, undefined)
+    ]
   }, void 0, false, {
     fileName: "VideoFeedCard.jsx",
     lineNumber: 9,
@@ -3111,545 +3229,303 @@ const ScanLine = () => /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_M
 }, undefined);
 _c2 = ScanLine;
 const VideoFeedCard = ({
-  mood
+  mood = 'Neutral'
 }) => {
   _s();
-  const [fps, setFps] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(20.7);
-  const [latency, setLatency] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(19.5);
-  const fileRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    const id = setInterval(() => {
-      setFps(f => +(f + (Math.random() - 0.5) * 1.5).toFixed(1));
-      setLatency(l => +(l + (Math.random() - 0.5) * 2).toFixed(1));
-    }, 900);
+  const [fps, setFps] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(30.0);
+  const [latency, setLatency] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(14.5);
+  const [facesCount, setFacesCount] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(1);
+  const [dominantEmotion, setDominantEmotion] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(mood || 'Neutral');
+  const [activeMode, setActiveMode] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)('host');
+  const fileRef = (0, react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+
+  // Poll live telemetry from Python Emotion AI
+  (0, react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch('/api/telemetry');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.visual) {
+          if (data.visual.fps !== undefined) setFps(data.visual.fps);
+          if (data.visual.latency_ms !== undefined) setLatency(data.visual.latency_ms);
+          if (data.visual.faces_count !== undefined) setFacesCount(data.visual.faces_count);
+          if (data.visual.dominant_emotion) setDominantEmotion(data.visual.dominant_emotion);
+        }
+      } catch (e) {}
+    }, 450);
     return () => clearInterval(id);
   }, []);
-  return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(_Tilt3D__WEBPACK_IMPORTED_MODULE_2__["default"], {
+
+  const emotionColors = {
+    Happy: '#10b981',
+    Sad: '#3b82f6',
+    Angry: '#ef4444',
+    Surprise: '#f59e0b',
+    Fear: '#ec4899',
+    Disgust: '#8b5cf6',
+    Contempt: '#64748b',
+    Neutral: '#00d4ff'
+  };
+  const currentEmotionColor = emotionColors[dominantEmotion] || '#00d4ff';
+
+  const onSelectHost = () => {
+    setActiveMode('host');
+    if (window.__resetHostCamera) window.__resetHostCamera();
+  };
+
+  const onSelectBrowser = () => {
+    setActiveMode(prev => prev === 'browser' ? 'host' : 'browser');
+    if (window.__toggleBrowserCamera) window.__toggleBrowserCamera();
+  };
+
+  const onUploadPhoto = async (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    setActiveMode('sample');
+    const fd = new FormData();
+    fd.append('file', f);
+    try {
+      const res = await fetch('/api/upload_face', { method: 'POST', body: fd });
+      if (res.ok && window.__setSnapshotFeed) {
+        window.__setSnapshotFeed();
+      }
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
+    }
+  };
+
+  return /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(_Tilt3D__WEBPACK_IMPORTED_MODULE_2__["default"], {
     intensity: 5,
     className: "glass-card",
-    "x-file-name": "VideoFeedCard",
-    "x-line-number": "125",
-    "x-column": "4",
-    "x-component": "Tilt3D",
-    "x-id": "VideoFeedCard_125_4",
-    "x-dynamic": "true",
-    children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-      className: "card-header",
-      "x-file-name": "VideoFeedCard",
-      "x-line-number": "126",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "VideoFeedCard_126_6",
-      "x-dynamic": "false",
-      children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-        className: "card-title",
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "127",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_127_8",
-        "x-dynamic": "false",
-        children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          className: "dot-cyan",
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "128",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_128_10",
-          "x-dynamic": "false"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 128,
-          columnNumber: 11
-        }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "129",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_129_10",
-          "x-dynamic": "false",
-          children: "Infant Video Feed & Targeting HUD"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 129,
-          columnNumber: 11
-        }, undefined)]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 127,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-        className: "card-subtle mono",
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "131",
-        "x-column": "8",
-        "x-component": "span",
-        "x-id": "VideoFeedCard_131_8",
-        "x-dynamic": "false",
-        children: "Slim 320 SSD (320x240) + FERPlus"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 131,
-        columnNumber: 9
-      }, undefined)]
-    }, void 0, true, {
-      fileName: _jsxFileName,
-      lineNumber: 126,
-      columnNumber: 7
-    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-      style: {
-        position: 'relative',
-        height: 380,
-        overflow: 'hidden',
-        background: 'radial-gradient(ellipse at center, #0f172a 0%, #020617 80%)',
-        borderTop: '1px solid rgba(148,163,184,0.1)',
-        borderBottom: '1px solid rgba(148,163,184,0.1)'
-      },
-      "x-file-name": "VideoFeedCard",
-      "x-line-number": "134",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "VideoFeedCard_134_6",
-      "x-dynamic": "true",
-      "x-source-type": "computed",
-      "x-source-editable": "false",
-      children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+    children: [
+      /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+        className: "card-header",
+        children: [
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+            className: "card-title",
+            children: [
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", { className: "dot-cyan" }, void 0, false),
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", { children: "Infant Video Feed & Targeting HUD" }, void 0, false)
+            ]
+          }, void 0, true),
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+            className: "card-subtle mono",
+            children: "Slim 320 SSD (320x240) + FERPlus"
+          }, void 0, false)
+        ]
+      }, void 0, true),
+
+      /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
         style: {
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: 'linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.07) 1px, transparent 1px)',
-          backgroundSize: '40px 40px'
+          position: 'relative',
+          height: 380,
+          overflow: 'hidden',
+          background: 'radial-gradient(ellipse at center, #0f172a 0%, #020617 80%)',
+          borderTop: '1px solid rgba(148,163,184,0.1)',
+          borderBottom: '1px solid rgba(148,163,184,0.1)'
         },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "146",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_146_8",
-        "x-dynamic": "false"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 146,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+        children: [
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+            style: {
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: 'linear-gradient(rgba(0,212,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.07) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+              pointerEvents: 'none',
+              zIndex: 2
+            }
+          }, void 0, false),
+
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+            style: {
+              position: 'absolute',
+              top: 12,
+              left: 16,
+              right: 16,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '0.7rem',
+              color: '#00d4ff',
+              letterSpacing: '0.18em',
+              textShadow: '0 0 8px rgba(0,212,255,0.65)',
+              zIndex: 10
+            },
+            children: [
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+                style: { display: 'inline-flex', alignItems: 'center', gap: 6 },
+                children: [
+                  /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+                    style: {
+                      width: 7,
+                      height: 7,
+                      borderRadius: '50%',
+                      background: activeMode === 'browser' ? '#a855f7' : '#10b981',
+                      display: 'inline-block',
+                      boxShadow: '0 0 8px ' + (activeMode === 'browser' ? '#a855f7' : '#10b981')
+                    }
+                  }, void 0, false),
+                  activeMode === 'browser' ? '◈ BROWSER WEBCAM ACTIVE' : activeMode === 'sample' ? '◈ PHOTO ARCHETYPE' : '◈ LIVE HARDWARE WEBCAM'
+                ]
+              }, void 0, true),
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+                children: ["FPS: ", fps, " | LATENCY: ", latency, "ms | FACES: ", facesCount]
+              }, void 0, true)
+            ]
+          }, void 0, true),
+
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(BabyFace3D, { mood: dominantEmotion }, void 0, false),
+
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(framer_motion__WEBPACK_IMPORTED_MODULE_1__.motion.div, {
+            animate: { rotate: 360 },
+            transition: { duration: 14, repeat: Infinity, ease: 'linear' },
+            style: {
+              position: 'absolute',
+              left: '50%',
+              top: '52%',
+              transform: 'translate(-50%, -50%)',
+              color: currentEmotionColor,
+              opacity: 0.5,
+              pointerEvents: 'none',
+              zIndex: 3
+            },
+            children: /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_3__["default"], {
+              size: 300,
+              strokeWidth: 0.4
+            }, void 0, false)
+          }, void 0, false),
+
+          [{ top: 50, left: 50, rot: 0 }, { top: 50, right: 50, rot: 90 }, { bottom: 50, left: 50, rot: 270 }, { bottom: 50, right: 50, rot: 180 }].map((c, i) =>
+            /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+              style: {
+                position: 'absolute',
+                ...c,
+                width: 22,
+                height: 22,
+                borderTop: '2px solid ' + currentEmotionColor,
+                borderLeft: '2px solid ' + currentEmotionColor,
+                transform: 'rotate(' + c.rot + 'deg)',
+                boxShadow: '0 0 8px ' + currentEmotionColor,
+                pointerEvents: 'none',
+                zIndex: 6
+              }
+            }, i, false)
+          ),
+
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(ScanLine, {}, void 0, false),
+
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+            style: {
+              position: 'absolute',
+              bottom: 10,
+              left: 16,
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '0.68rem',
+              color: currentEmotionColor,
+              letterSpacing: '0.14em',
+              zIndex: 10,
+              textShadow: '0 0 8px ' + currentEmotionColor + 'aa'
+            },
+            children: facesCount > 0 ? ('TARGET LOCKED • ' + facesCount + ' FACE • AFFECT: ' + dominantEmotion.toUpperCase()) : 'SEARCHING TARGET • NEURAL SCAN ACTIVE'
+          }, void 0, false)
+        ]
+      }, void 0, true),
+
+      /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
         style: {
-          position: 'absolute',
-          top: 12,
-          left: 16,
-          right: 16,
+          padding: '12px 18px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: '0.7rem',
-          color: '#00d4ff',
-          letterSpacing: '0.18em',
-          textShadow: '0 0 8px rgba(0,212,255,0.65)'
+          gap: 12,
+          flexWrap: 'wrap',
+          background: 'rgba(7, 9, 14, 0.6)'
         },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "156",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_156_8",
-        "x-dynamic": "false",
-        children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "172",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_172_10",
-          "x-dynamic": "false",
-          children: "\u25C8 ULTRA-LIGHT FACE & EMOTION AI"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 172,
-          columnNumber: 11
-        }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "173",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_173_10",
-          "x-dynamic": "true",
-          "x-source-type": "state",
-          "x-source-var": "fps",
-          "x-source-editable": "false",
-          children: ["FPS: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-            "data-ve-dynamic": "true",
-            "x-excluded": "true",
-            style: {
-              display: "contents"
-            },
-            "x-file-name": "VideoFeedCard",
-            "x-line-number": "173",
-            "x-column": "10",
-            "x-component": "span",
-            "x-id": "VideoFeedCard_173_10_expr1",
-            "x-dynamic": "true",
-            "x-source-type": "state",
-            "x-source-var": "fps",
-            "x-source-editable": "false",
-            children: fps
-          }, void 0, false), " | LATENCY: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-            "data-ve-dynamic": "true",
-            "x-excluded": "true",
-            style: {
-              display: "contents"
-            },
-            "x-file-name": "VideoFeedCard",
-            "x-line-number": "173",
-            "x-column": "10",
-            "x-component": "span",
-            "x-id": "VideoFeedCard_173_10_expr3",
-            "x-dynamic": "true",
-            "x-source-type": "state",
-            "x-source-var": "latency",
-            "x-source-editable": "false",
-            children: latency
-          }, void 0, false), "ms | FACES: 1"]
-        }, void 0, true, {
-          fileName: _jsxFileName,
-          lineNumber: 173,
-          columnNumber: 11
-        }, undefined)]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 156,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(BabyFace3D, {
-        mood: mood,
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "177",
-        "x-column": "8",
-        "x-component": "BabyFace3D",
-        "x-id": "VideoFeedCard_177_8",
-        "x-dynamic": "false"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 177,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(framer_motion__WEBPACK_IMPORTED_MODULE_1__.motion.div, {
-        animate: {
-          rotate: 360
-        },
-        transition: {
-          duration: 14,
-          repeat: Infinity,
-          ease: 'linear'
-        },
-        style: {
-          position: 'absolute',
-          left: '50%',
-          top: '52%',
-          transform: 'translate(-50%, -50%)',
-          color: '#00d4ff',
-          opacity: 0.6
-        },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "180",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_180_8",
-        "x-dynamic": "false",
-        children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_3__["default"], {
-          size: 320,
-          strokeWidth: 0.4,
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "192",
-          "x-column": "10",
-          "x-component": "Crosshair",
-          "x-id": "VideoFeedCard_192_10",
-          "x-dynamic": "false"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 192,
-          columnNumber: 11
-        }, undefined)
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 180,
-        columnNumber: 9
-      }, undefined), [{
-        top: 60,
-        left: 60,
-        rot: 0
-      }, {
-        top: 60,
-        right: 60,
-        rot: 90
-      }, {
-        bottom: 90,
-        left: 60,
-        rot: 270
-      }, {
-        bottom: 90,
-        right: 60,
-        rot: 180
-      }].map((c, i) => /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-        style: {
-          position: 'absolute',
-          ...c,
-          width: 20,
-          height: 20,
-          borderTop: '2px solid #00d4ff',
-          borderLeft: '2px solid #00d4ff',
-          transform: `rotate(${c.rot}deg)`,
-          boxShadow: '0 0 8px rgba(0,212,255,0.7)'
-        },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "202",
-        "x-column": "10",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_202_10",
-        "x-dynamic": "false"
-      }, i, false, {
-        fileName: _jsxFileName,
-        lineNumber: 202,
-        columnNumber: 11
-      }, undefined)), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(ScanLine, {
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "217",
-        "x-column": "8",
-        "x-component": "ScanLine",
-        "x-id": "VideoFeedCard_217_8",
-        "x-dynamic": "false"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 217,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-        style: {
-          position: 'absolute',
-          bottom: 10,
-          left: 16,
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: '0.68rem',
-          color: '#a855f7',
-          letterSpacing: '0.14em'
-        },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "219",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_219_8",
-        "x-dynamic": "true",
-        "x-source-type": "computed",
-        "x-source-editable": "false",
-        children: ["TARGET LOCKED \u2022 AFFECT: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "data-ve-dynamic": "true",
-          "x-excluded": "true",
-          style: {
-            display: "contents"
-          },
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "219",
-          "x-column": "8",
-          "x-component": "div",
-          "x-id": "VideoFeedCard_219_8_expr1",
-          "x-dynamic": "true",
-          "x-source-type": "computed",
-          "x-source-editable": "false",
-          children: mood.toUpperCase()
-        }, void 0, false)]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 219,
-        columnNumber: 9
-      }, undefined)]
-    }, void 0, true, {
-      fileName: _jsxFileName,
-      lineNumber: 134,
-      columnNumber: 7
-    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-      style: {
-        padding: '12px 20px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: 14,
-        flexWrap: 'wrap'
-      },
-      "x-file-name": "VideoFeedCard",
-      "x-line-number": "234",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "VideoFeedCard_234_6",
-      "x-dynamic": "false",
-      children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
-        style: {
-          display: 'flex',
-          gap: 20,
-          fontSize: '0.82rem',
-          fontFamily: 'JetBrains Mono, monospace',
-          color: '#94a3b8'
-        },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "244",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "VideoFeedCard_244_8",
-        "x-dynamic": "false",
-        children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "245",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_245_10",
-          "x-dynamic": "false",
-          children: ["FPS: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("strong", {
-            style: {
-              color: '#38bdf8'
-            },
-            "x-file-name": "VideoFeedCard",
-            "x-line-number": "245",
-            "x-column": "21",
-            "x-component": "strong",
-            "x-id": "VideoFeedCard_245_21",
-            "x-dynamic": "true",
-            "x-source-type": "state",
-            "x-source-var": "fps",
-            "x-source-editable": "false",
-            children: fps
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 245,
-            columnNumber: 22
-          }, undefined)]
-        }, void 0, true, {
-          fileName: _jsxFileName,
-          lineNumber: 245,
-          columnNumber: 11
-        }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "246",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_246_10",
-          "x-dynamic": "false",
-          children: ["Faces: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("strong", {
-            style: {
-              color: '#fff'
-            },
-            "x-file-name": "VideoFeedCard",
-            "x-line-number": "246",
-            "x-column": "23",
-            "x-component": "strong",
-            "x-id": "VideoFeedCard_246_23",
-            "x-dynamic": "false",
-            children: "1"
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 246,
-            columnNumber: 24
-          }, undefined)]
-        }, void 0, true, {
-          fileName: _jsxFileName,
-          lineNumber: 246,
-          columnNumber: 11
-        }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "247",
-          "x-column": "10",
-          "x-component": "span",
-          "x-id": "VideoFeedCard_247_10",
-          "x-dynamic": "false",
-          children: ["Facial Affect: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("strong", {
-            style: {
-              color: '#34d399',
-              textTransform: 'capitalize'
-            },
-            "x-file-name": "VideoFeedCard",
-            "x-line-number": "247",
-            "x-column": "31",
-            "x-component": "strong",
-            "x-id": "VideoFeedCard_247_31",
-            "x-dynamic": "true",
-            "x-source-type": "prop",
-            "x-source-var": "mood",
-            "x-source-editable": "false",
-            children: mood
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 247,
-            columnNumber: 32
-          }, undefined)]
-        }, void 0, true, {
-          fileName: _jsxFileName,
-          lineNumber: 247,
-          columnNumber: 11
-        }, undefined)]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 244,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("button", {
-        onClick: () => {
-          var _fileRef$current;
-          return (_fileRef$current = fileRef.current) === null || _fileRef$current === void 0 ? void 0 : _fileRef$current.click();
-        },
-        className: "btn-mini",
-        style: {
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8
-        },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "249",
-        "x-column": "8",
-        "x-component": "button",
-        "x-id": "VideoFeedCard_249_8",
-        "x-dynamic": "false",
-        children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"], {
-          size: 14,
-          "x-file-name": "VideoFeedCard",
-          "x-line-number": "254",
-          "x-column": "10",
-          "x-component": "Upload",
-          "x-id": "VideoFeedCard_254_10",
-          "x-dynamic": "false"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 254,
-          columnNumber: 11
-        }, undefined), " Upload Face Photo"]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 249,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("input", {
-        ref: fileRef,
-        type: "file",
-        accept: "image/*",
-        style: {
-          display: 'none'
-        },
-        onChange: async e => {
-          const f = e.target.files && e.target.files[0];
-          if (!f) return;
-          const fd = new FormData();
-          fd.append('file', f);
-          await fetch('/api/upload_face', { method: 'POST', body: fd });
-        },
-        "x-file-name": "VideoFeedCard",
-        "x-line-number": "256",
-        "x-column": "8",
-        "x-component": "input",
-        "x-id": "VideoFeedCard_256_8",
-        "x-dynamic": "false"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 256,
-        columnNumber: 9
-      }, undefined)]
-    }, void 0, true, {
-      fileName: _jsxFileName,
-      lineNumber: 234,
-      columnNumber: 7
-    }, undefined)]
-  }, void 0, true, {
-    fileName: _jsxFileName,
-    lineNumber: 125,
-    columnNumber: 5
-  }, undefined);
+        children: [
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+            style: { display: 'flex', gap: 16, fontSize: '0.82rem', fontFamily: 'JetBrains Mono, monospace', color: '#94a3b8' },
+            children: [
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+                children: ["FPS: ", /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("strong", { style: { color: '#38bdf8' }, children: fps }, void 0, false)]
+              }, void 0, true),
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+                children: ["Faces: ", /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("strong", { style: { color: facesCount > 0 ? '#10b981' : '#f59e0b' }, children: facesCount }, void 0, false)]
+              }, void 0, true),
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("span", {
+                children: ["Affect: ", /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("strong", { style: { color: currentEmotionColor, textTransform: 'capitalize' }, children: dominantEmotion }, void 0, false)]
+              }, void 0, true)
+            ]
+          }, void 0, true),
+
+          /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
+            style: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
+            children: [
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("button", {
+                onClick: onSelectHost,
+                className: "btn-mini",
+                style: {
+                  background: activeMode === 'host' ? 'rgba(56, 189, 248, 0.2)' : 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid ' + (activeMode === 'host' ? '#38bdf8' : 'rgba(148, 163, 184, 0.2)'),
+                  color: activeMode === 'host' ? '#38bdf8' : '#cbd5e1',
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                },
+                children: "● Live Camera"
+              }, void 0, false),
+
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("button", {
+                onClick: onSelectBrowser,
+                className: "btn-mini",
+                style: {
+                  background: activeMode === 'browser' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid ' + (activeMode === 'browser' ? '#a855f7' : 'rgba(148, 163, 184, 0.2)'),
+                  color: activeMode === 'browser' ? '#c084fc' : '#cbd5e1',
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                },
+                children: "📹 Device Webcam"
+              }, void 0, false),
+
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("button", {
+                onClick: () => { if (fileRef.current) fileRef.current.click(); },
+                className: "btn-mini",
+                style: {
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: activeMode === 'sample' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid ' + (activeMode === 'sample' ? '#10b981' : 'rgba(148, 163, 184, 0.2)'),
+                  color: activeMode === 'sample' ? '#34d399' : '#cbd5e1',
+                  padding: '6px 12px',
+                  borderRadius: 6,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                },
+                children: [
+                  /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_4__["default"], { size: 13 }, void 0, false),
+                  " Upload Photo"
+                ]
+              }, void 0, true),
+
+              /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("input", {
+                ref: fileRef,
+                type: "file",
+                accept: "image/*",
+                style: { display: 'none' },
+                onChange: onUploadPhoto
+              }, void 0, false)
+            ]
+          }, void 0, true)
+        ]
+      }, void 0, true)
+    ]
+  }, void 0, true);
 };
 _s(VideoFeedCard, "HNtg1u5knAro48VuzwFaRRkeyeY=");
 _c3 = VideoFeedCard;

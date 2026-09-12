@@ -581,9 +581,14 @@
                         <span>Faces: <strong id="valFaces" style="color: #fff;">0</strong></span>
                         <span>Facial Affect: <strong id="valEmotion" style="color: #34d399;">Neutral</strong></span>
                     </div>
-                    <button class="btn-speak" onclick="document.getElementById('fileInput').click()" style="padding: 6px 14px; border-radius: 8px;">
-                        Upload Face Photo
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-speak" onclick="switchToCamera()" style="padding: 6px 14px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8;">
+                            ● Live Camera
+                        </button>
+                        <button class="btn-speak" onclick="document.getElementById('fileInput').click()" style="padding: 6px 14px; border-radius: 8px;">
+                            Upload Face Photo
+                        </button>
+                    </div>
                     <input type="file" id="fileInput" accept="image/*" onchange="uploadImage(this.files[0])">
                 </div>
             </div>
@@ -956,6 +961,15 @@
                 }
             } catch (e) {
                 alert("Image upload failed: " + e.message);
+            }
+        }
+
+        async function switchToCamera() {
+            try {
+                await fetch('/api/set_source?source=camera');
+                document.getElementById('videoFeed').src = '/video_feed?t=' + Date.now();
+            } catch (e) {
+                console.error(e);
             }
         }
     </script>
