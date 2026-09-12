@@ -121,19 +121,75 @@ class MultimodalDistressFusion:
         else:
             narrative = "Monitoring infant video and audio telemetry in real time."
 
-        # Baby perspective translation
-        baby_msg = audio_data.get("baby_message", "") if audio_data else ""
-        if not baby_msg:
-            if face_emo in ["Happy", "Neutral"]:
-                baby_msg = f"I am feeling calm, peaceful, and comfortable right now with you, Mommy and Daddy!"
-            else:
-                baby_msg = f"I am feeling a little fussy right now and need some gentle comfort."
+        # Multilingual Baby perspective translation
+        multilingual_msgs = {
+            "hungry": {
+                "en": "My little tummy is rumbling and feeling so empty! I am super hungry and need some warm milk please.",
+                "hi": "मेरा नन्हा पेट खाली है और भूख से गुड़गुड़ा रहा है! मुझे बहुत भूख लगी है, कृपया मुझे थोड़ा गर्म दूध पिलाइए।",
+                "bn": "আমার ছোট্ট পেটটা খালি হয়ে গেছে আর খিদে পেয়েছে! আমার খুব খিদে পেয়েছে, দয়া করে আমাকে একটু উষ্ণ দুধ খাওয়ান।"
+            },
+            "belly_pain": {
+                "en": "My little tummy really cramps and hurts inside! I have stubborn gas bubbles. Please bicycle my legs gently and rub my tummy.",
+                "hi": "मेरे पेट में मरोड़ और ऐंठन हो रही है! गैस फंसी है। कृपया मेरे पैर साइकिल की तरह चलाएं और पेट की हल्की मालिश करें।",
+                "bn": "আমার পেটে মোচড় দিয়ে ব্যথা করছে আর অস্বস্তি হচ্ছে! পেটে হালকা মালিশ আর একটু উষ্ণ সেঁক দিলে খুব আরাম পাব।"
+            },
+            "burping": {
+                "en": "There is a sneaky air bubble trapped in my chest after drinking milk! Please hold me upright over your shoulder and gently pat my back.",
+                "hi": "दूध पीने के बाद छाती में एक हवा का बुलबुला फंस गया है! कृपया मुझे कंधे पर सीधा लेकर पीठ थपथपाएं।",
+                "bn": "দুধ খাওয়ার পর বুকে একটা বাতাসের বুদ্বুদ আটকে আছে! দয়া করে আমাকে কাঁধের ওপর সোজা করে ধরে পিঠে হালকা চাপড় দিন।"
+            },
+            "tired": {
+                "en": "My eyes are heavy and everything around me is too bright and loud! Please wrap me snugly, dim the lights, and rock me to sleep.",
+                "hi": "आसपास बहुत उजाला और शोर है, मेरी पलकें भारी हो रही हैं! कृपया मुझे किसी शांत और मंद कमरे में झुलाकर सुलाएं।",
+                "bn": "চারপাশে খুব আওয়াজ আর আলো, আমার চোখ দুটো ভারী হয়ে আসছে! দয়া করে একটি শান্ত আবছা আলোর ঘরে নিয়ে আমাকে একটু দোল দিন যাতে আমি ঘুমাতে পারি।"
+            },
+            "discomfort": {
+                "en": "Something is tickling, pinching, or bothering my sensitive skin! Please check if my diaper is wet or if my clothes are tight.",
+                "hi": "मेरे कपड़ों में कुछ चुभ रहा है या मेरा डायपर गीला हो सकता है! कृपया मेरे कपड़े और डायपर जांचें।",
+                "bn": "আমার জামাকাপড়ে কিছু একটা খচখচ করছে বা ডায়পারটা ভিজে গেছে! দয়া করে আমার ডায়পার আর জামাকাপড় পরীক্ষা করুন।"
+            },
+            "calm": {
+                "en": "I am feeling calm, peaceful, and comfortable right now with you, Mommy and Daddy!",
+                "hi": "मैं इस समय आपके साथ बहुत शांत, सुरक्षित और खुश महसूस कर रहा हूँ, मम्मी-पापा!",
+                "bn": "আমি এখন তোমাদের সাথে খুব শান্ত, নিরাপদ আর খুশি অনুভব করছি, মা-বাবা!"
+            },
+            "fussy": {
+                "en": "I am feeling a little fussy right now and need some gentle comfort.",
+                "hi": "मुझे थोड़ी परेशानी हो रही है और मुझे आपके प्यार और दुलार की जरूरत है।",
+                "bn": "আমার একটু মন খারাপ লাগছে এবং তোমাদের একটু আদর দরকার।"
+            }
+        }
 
-        soothing_steps = audio_data.get("soothing_checklist", []) if audio_data else [
-            "Check diaper comfort and skin temperature.",
-            "Offer gentle skin-to-skin holding and rhythmic rocking.",
-            "Verify feeding schedule and wake window duration."
-        ]
+        multilingual_soothing = {
+            "en": [
+                "Check diaper comfort and skin temperature.",
+                "Offer gentle skin-to-skin holding and rhythmic rocking.",
+                "Verify feeding schedule and wake window duration.",
+                "Swaddle snugly in a quiet, softly lit nursery environment."
+            ],
+            "hi": [
+                "डायपर का सूखापन और शरीर का तापमान जांचें।",
+                "शिशु को सीने से लगाकर रखें और हल्के हाथों से झुलाएं।",
+                "दूध पिलाने का समय और जागने का अंतराल जांचें।",
+                "शांत और मंद रोशनी वाले कमरे में शिशु को हल्के कपड़े में लपेटें।"
+            ],
+            "bn": [
+                "ডায়পারের আরাম ও শরীরের তাপমাত্রা পরীক্ষা করুন।",
+                "কোলে নিয়ে শান্তভাবে ছন্দময়ভাবে দোল দিন।",
+                "খাওয়ানোর সময় এবং জেগে থাকার সময়সীমা পরীক্ষা করুন।",
+                "একটি শান্ত ও আবছা আলোর ঘরে আরামদায়কভাবে জড়িয়ে রাখুন।"
+            ]
+        }
+
+        if cry_cat and cry_cat in multilingual_msgs:
+            baby_msgs = multilingual_msgs[cry_cat]
+        elif face_emo in ["Happy", "Neutral"]:
+            baby_msgs = multilingual_msgs["calm"]
+        else:
+            baby_msgs = multilingual_msgs["fussy"]
+
+        baby_msg = baby_msgs["en"]
+        soothing_steps = audio_data.get("soothing_checklist", []) if audio_data else multilingual_soothing["en"]
 
         return {
             "unified_distress_score": unified_pct,
@@ -145,7 +201,9 @@ class MultimodalDistressFusion:
             "audio_distress_score": round(a_score * 100.0, 1) if a_score is not None else None,
             "narrative": narrative,
             "baby_message": baby_msg,
+            "baby_messages": baby_msgs,
             "soothing_checklist": soothing_steps,
+            "soothing_checklists": multilingual_soothing,
             "audio_category": cry_cat,
             "visual_emotion": face_emo
         }

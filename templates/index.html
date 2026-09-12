@@ -523,6 +523,25 @@
             display: none;
         }
 
+        .lang-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #94a3b8;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.74rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-btn.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(168, 85, 247, 0.35));
+            border: 1px solid #38bdf8;
+            color: #38bdf8;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
         footer {
             padding: 16px 32px;
             border-top: 1px solid var(--border-color);
@@ -546,13 +565,20 @@
         </div>
 
         <div class="badges-group">
+            <!-- Language Switcher -->
+            <div style="display: inline-flex; align-items: center; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 9px; padding: 2px 4px; gap: 3px;">
+                <span style="padding: 0 4px; color: #38bdf8; font-size: 0.8rem;">🌐</span>
+                <button class="lang-btn active" id="lang-en" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" id="lang-hi" onclick="setLanguage('hi')">हिन्दी</button>
+                <button class="lang-btn" id="lang-bn" onclick="setLanguage('bn')">বাংলা</button>
+            </div>
             <div class="status-badge badge-video">
                 <div class="dot-pulse" style="background: #38bdf8;"></div>
-                <span>VISION ACTIVE</span>
+                <span id="txtVisionActive">VISION ACTIVE</span>
             </div>
             <div class="status-badge badge-audio">
                 <div class="dot-pulse" style="background: #ef4444;"></div>
-                <span>ACOUSTIC ACTIVE</span>
+                <span id="txtAcousticActive">ACOUSTIC ACTIVE</span>
             </div>
         </div>
     </header>
@@ -851,6 +877,97 @@
             }
         }
 
+        let currentLanguage = localStorage.getItem('crysense_lang') || 'en';
+
+        const classicTranslations = {
+            en: {
+                visionActive: "VISION ACTIVE",
+                acousticActive: "ACOUSTIC ACTIVE",
+                title: "Multimodal Infant Distress Monitor",
+                subtitle: "Face Emotion AI (Slim 320) + BabyCry AI Acoustics",
+                hudTitle: "Infant Video Feed & Targeting HUD",
+                btnLiveCam: "● Live Camera",
+                btnUploadFace: "Upload Face Photo",
+                btnRecordMic: "Record Cry via Mic (3s)",
+                btnUploadAudio: "Upload Audio File",
+                emotions: { Neutral: "Neutral", Happy: "Happy", Sad: "Sad", Surprise: "Surprise", Fear: "Fear", Disgust: "Disgust", Angry: "Angry", Contempt: "Contempt" },
+                cryMessages: {
+                    hungry: "My little tummy is rumbling and feeling so empty! I am super hungry and need some warm milk please.",
+                    belly_pain: "My little tummy really cramps and hurts inside! I have stubborn gas bubbles. Please bicycle my legs gently and rub my tummy.",
+                    burping: "There is a sneaky air bubble trapped in my chest after drinking milk! Please hold me upright over your shoulder and gently pat my back.",
+                    tired: "My eyes are heavy and everything around me is too bright and loud! Please wrap me snugly, dim the lights, and rock me to sleep.",
+                    discomfort: "Something is tickling, pinching, or bothering my sensitive skin! Please check if my diaper is wet or if my clothes are tight.",
+                    calm: "I am feeling calm, peaceful, and comfortable right now with you, Mommy and Daddy!",
+                    fussy: "I am feeling a little fussy right now and need some gentle comfort."
+                }
+            },
+            hi: {
+                visionActive: "दृष्टि सक्रिय",
+                acousticActive: "ध्वनि सक्रिय",
+                title: "मल्टीमॉडल शिशु संकट मॉनिटर",
+                subtitle: "चेहरे के भाव एआई (स्लिम 320) + शिशु रुदन ध्वनिकी",
+                hudTitle: "शिशु वीडियो फ़ीड और लक्ष्यीकरण एचयूडी",
+                btnLiveCam: "● लाइव कैमरा",
+                btnUploadFace: "फोटो अपलोड करें",
+                btnRecordMic: "माइक से रोना रिकॉर्ड करें (3s)",
+                btnUploadAudio: "ऑडियो अपलोड करें",
+                emotions: { Neutral: "शांत / सामान्य", Happy: "प्रसन्न", Sad: "उदास", Surprise: "आश्चर्य", Fear: "भय", Disgust: "अप्रिय", Angry: "क्रोधित", Contempt: "खिन्न" },
+                cryMessages: {
+                    hungry: "मेरा नन्हा पेट खाली है और भूख से गुड़गुड़ा रहा है! मुझे बहुत भूख लगी है, कृपया मुझे थोड़ा गर्म दूध पिलाइए।",
+                    belly_pain: "मेरे पेट में मरोड़ और ऐंठन हो रही है! गैस फंसी है। कृपया मेरे पैर साइकिल की तरह चलाएं और पेट की हल्की मालिश करें।",
+                    burping: "दूध पीने के बाद छाती में एक हवा का बुलबुला फंस गया है! कृपया मुझे कंधे पर सीधा लेकर पीठ थपथपाएं।",
+                    tired: "आसपास बहुत उजाला और शोर है, मेरी पलकें भारी हो रही हैं! कृपया मुझे किसी शांत और मंद कमरे में झुलाकर सुलाएं।",
+                    discomfort: "मेरे कपड़ों में कुछ चुभ रहा है या मेरा डायपर गीला हो सकता है! कृपया मेरे कपड़े और डायपर जांचें।",
+                    calm: "मैं इस समय आपके साथ बहुत शांत, सुरक्षित और खुश महसूस कर रहा हूँ, मम्मी-पापा!",
+                    fussy: "मुझे थोड़ी परेशानी हो रही है और मुझे आपके प्यार और दुलार की जरूरत है।"
+                }
+            },
+            bn: {
+                visionActive: "দৃষ্টি সক্রিয়",
+                acousticActive: "শব্দ সক্রিয়",
+                title: "মাল্টিমোডাল শিশু কষ্ট মনিটর",
+                subtitle: "মুখের অভিব্যক্তি এআই (স্লিম ৩২০) + শিশুর কান্নার ধ্বনিবিজ্ঞান",
+                hudTitle: "শিশু ভিডিও ফিড এবং টার্গেটিং এইচইউডি",
+                btnLiveCam: "● লাইভ ক্যামেরা",
+                btnUploadFace: "ছবি আপলোড করুন",
+                btnRecordMic: "মাইকে কান্না রেকর্ড করুন (৩ সে.)",
+                btnUploadAudio: "অডিও আপলোড করুন",
+                emotions: { Neutral: "স্বাভাবিক", Happy: "খুশি", Sad: "বিষণ্ণ", Surprise: "বিস্মিত", Fear: "ভয়", Disgust: "বিরক্ত", Angry: "রাগান্বিত", Contempt: "উদাসীন" },
+                cryMessages: {
+                    hungry: "আমার ছোট্ট পেটটা খালি হয়ে গেছে আর খিদে পেয়েছে! আমার খুব খিদে পেয়েছে, দয়া করে আমাকে একটু উষ্ণ দুধ খাওয়ান।",
+                    belly_pain: "আমার পেটে মোচড় দিয়ে ব্যথা করছে আর অস্বস্তি হচ্ছে! পেটে হালকা মালিশ আর একটু উষ্ণ সেঁক দিলে খুব আরাম পাব।",
+                    burping: "দুধ খাওয়ার পর বুকে একটা বাতাসের বুদ্বুদ আটকে আছে! দয়া করে আমাকে কাঁধের ওপর সোজা করে ধরে পিঠে হালকা চাপড় দিন।",
+                    tired: "চারপাশে খুব আওয়াজ আর আলো, আমার চোখ দুটো ভারী হয়ে আসছে! দয়া করে একটি শান্ত আবছা আলোর ঘরে নিয়ে আমাকে একটু দোল দিন যাতে আমি ঘুমাতে পারি।",
+                    discomfort: "আমার জামাকাপড়ে কিছু একটা খচখচ করছে বা ডায়পারটা ভিজে গেছে! দয়া করে আমার ডায়পার আর জামাকাপড় পরীক্ষা করুন।",
+                    calm: "আমি এখন তোমাদের সাথে খুব শান্ত, নিরাপদ আর খুশি অনুভব করছি, মা-বাবা!",
+                    fussy: "আমার একটু মন খারাপ লাগছে এবং তোমাদের একটু আদর দরকার।"
+                }
+            }
+        };
+
+        function setLanguage(lang) {
+            if (!['en', 'hi', 'bn'].includes(lang)) return;
+            currentLanguage = lang;
+            localStorage.setItem('crysense_lang', lang);
+
+            // Update active button styling
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`lang-${lang}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const t = classicTranslations[lang] || classicTranslations.en;
+            if (document.getElementById('txtVisionActive')) document.getElementById('txtVisionActive').textContent = t.visionActive;
+            if (document.getElementById('txtAcousticActive')) document.getElementById('txtAcousticActive').textContent = t.acousticActive;
+
+            // Re-fetch telemetry to refresh display
+            fetchTelemetry();
+        }
+
+        // Initialize saved language
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLanguage);
+        });
+
         // Web Speech API (Text-to-Speech)
         function speakBabyMessage() {
             const text = document.getElementById('babyMessage').textContent.replace(/"/g, '');
@@ -860,8 +977,19 @@
             }
             window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(text);
-            utter.pitch = 1.35; // Slightly higher pitch for baby voice
-            utter.rate = 0.95;
+            if (currentLanguage === 'hi') {
+                utter.lang = 'hi-IN';
+                utter.pitch = 1.25;
+                utter.rate = 0.9;
+            } else if (currentLanguage === 'bn') {
+                utter.lang = 'bn-IN';
+                utter.pitch = 1.25;
+                utter.rate = 0.9;
+            } else {
+                utter.lang = 'en-US';
+                utter.pitch = 1.35;
+                utter.rate = 0.95;
+            }
             window.speechSynthesis.speak(utter);
         }
 
