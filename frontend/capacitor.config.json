@@ -1,0 +1,9 @@
+{
+  "appId": "com.crysense.app",
+  "appName": "BabyCry Sense AI",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true,
+    "androidScheme": "https"
+  }
+}

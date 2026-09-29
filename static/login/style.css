@@ -1,0 +1,377 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #5b5de6;
+  --primary-dark: #4547c9;
+  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  --demo-gradient: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  --text: #24243a;
+  --muted: #707087;
+  --white: #ffffff;
+  --border: #dedff0;
+  --success: #16a34a;
+  --error: #e11d48;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Baby photo background with fallback to local or Unsplash */
+.login-page,
+.register-page {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(120deg, rgba(22, 25, 65, 0.58), rgba(88, 69, 120, 0.35)),
+    url("/static/images/login_baby.jpg"),
+    url("https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=2000&q=85");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  position: relative;
+}
+
+.background-overlay {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+/* ---------- LOGIN POP-UP CARD ---------- */
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: min(440px, 100%);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 26px;
+  padding: 38px 34px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.4);
+  animation: popup 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.brand-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f0f0ff 0%, #e0e2fe 100%);
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  margin: 0 auto 14px;
+  box-shadow: 0 8px 20px rgba(91, 93, 230, 0.15);
+  border: 2px solid #ffffff;
+}
+
+h1 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #1e1b4b;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 26px;
+}
+
+.input-group {
+  margin-bottom: 18px;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #334155;
+  margin-bottom: 7px;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  height: 48px;
+  border: 1.5px solid var(--border);
+  border-radius: 13px;
+  padding: 0 16px;
+  outline: none;
+  font-size: 15px;
+  background: #fafaff;
+  color: #1e293b;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(91, 93, 230, 0.14);
+  background: #ffffff;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 20px;
+  font-size: 13px;
+}
+
+.remember,
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember input,
+.terms input {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 50px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--primary-gradient);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.primary-btn:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.42);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+.demo-btn {
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid rgba(236, 72, 153, 0.3);
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(253, 242, 248, 0.9), rgba(252, 231, 243, 0.9));
+  color: #be185d;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.demo-btn:hover {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  color: #ffffff;
+  border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(236, 72, 153, 0.3);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 20px 0;
+  letter-spacing: 0.05em;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  background: #e2e8f0;
+  flex: 1;
+}
+
+.register-text,
+.login-link {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.message {
+  min-height: 22px;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+/* ---------- REGISTRATION FORM ---------- */
+
+.registration-container {
+  position: relative;
+  z-index: 2;
+  width: min(760px, 100%);
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 26px;
+  padding: 38px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.4);
+  animation: formIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+@keyframes formIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.registration-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.registration-header .brand-icon {
+  margin-bottom: 12px;
+}
+
+.registration-header h1 {
+  margin-bottom: 6px;
+}
+
+.registration-header p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.registration-form {
+  max-width: 660px;
+  margin: auto;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.terms {
+  font-size: 13px;
+  margin: 6px 0 22px;
+}
+
+.login-link {
+  margin-top: 20px;
+}
+
+/* Spinner animation for button */
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 650px) {
+  .registration-container {
+    padding: 28px 20px;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .login-card {
+    padding: 30px 22px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .login-page,
+  .register-page {
+    background-attachment: scroll;
+    padding: 16px;
+  }
+}

@@ -10,18 +10,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #07090e;
-            --bg-secondary: #0f141f;
-            --bg-card: rgba(18, 24, 38, 0.75);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(0, 212, 255, 0.3);
-            --text-main: #f1f5f9;
+            --bg-primary: #fff5f8;
+            --bg-secondary: #fdf2f8;
+            --bg-card: rgba(255, 255, 255, 0.90);
+            --border-color: rgba(199, 210, 254, 0.16);
+            --border-glow: rgba(147, 197, 253, 0.4);
+            --text-main: #1e293b;
             --text-muted: #94a3b8;
-            --accent-cyan: #00d4ff;
-            --accent-green: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-red: #ef4444;
-            --accent-purple: #a855f7;
+            --accent-cyan: #38bdf8;
+            --accent-green: #34d399;
+            --accent-amber: #fde047;
+            --accent-red: #f472b6;
+            --accent-purple: #c084fc;
             --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
@@ -33,11 +33,12 @@
         }
 
         body {
-            background-color: var(--bg-primary);
-            background-image: 
-                radial-gradient(circle at 10% 15%, rgba(0, 212, 255, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 90% 85%, rgba(239, 68, 68, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
+            background-color: #fff5f8;
+            background-image: url('/static/baby_bg.jpg');
+            background-repeat: repeat;
+            background-size: 380px auto;
+            background-attachment: fixed;
+            background-position: top center;
             color: var(--text-main);
             font-family: var(--font-sans);
             min-height: 100vh;
@@ -580,6 +581,11 @@
                 <div class="dot-pulse" style="background: #ef4444;"></div>
                 <span id="txtAcousticActive">ACOUSTIC ACTIVE</span>
             </div>
+            <!-- User Status & Logout -->
+            <div style="display: inline-flex; align-items: center; gap: 8px; margin-left: 6px;">
+                <span style="font-size: 0.78rem; font-family: var(--font-mono); color: #c4b5fd;">👤 Parent</span>
+                <a href="/api/logout" style="padding: 4px 10px; border-radius: 6px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; font-size: 0.72rem; text-decoration: none; font-weight: bold;">Logout</a>
+            </div>
         </div>
     </header>
 
@@ -685,32 +691,44 @@
             </div>
 
             <!-- Acoustic Cry Control Center -->
-            <div class="glass-card audio-section-card">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="card-title">
-                        <span style="font-size: 1.1rem;">🎙️</span>
+            <div class="glass-card audio-section-card" style="border-radius: 24px; padding: 22px 24px; background: rgba(255, 255, 255, 0.95); border: 2px solid rgba(244, 114, 182, 0.35); box-shadow: 0 20px 40px rgba(244, 114, 182, 0.16);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <div style="display: inline-flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 800; color: #334155; font-family: 'Quicksand', 'Outfit', sans-serif;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
                         <span>Acoustic Baby Cry Classifier</span>
                     </div>
-                    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">194-DIM ACOUSTIC SVC</span>
+                    <span style="font-size: 0.84rem; font-weight: 800; color: #f43f5e; letter-spacing: 0.12em; font-family: 'JetBrains Mono', monospace;">194-DIM ACOUSTIC SVC</span>
                 </div>
 
-                <div class="mic-bar">
-                    <button class="btn-mic" id="btnMicRecord" onclick="toggleMicRecording()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-                        <span id="micBtnText">Record Cry via Mic (3s)</span>
+                <div class="mic-bar" style="display: flex; gap: 16px; margin-bottom: 22px; align-items: stretch;">
+                    <button class="btn-mic-lux" id="btnMicRecord" onclick="toggleMicRecording()" style="flex: 1.85; background: linear-gradient(135deg, #fb7185 0%, #f43f5e 48%, #e11d48 100%); border-radius: 22px; padding: 12px 20px 12px 24px; display: flex; align-items: center; justify-content: space-between; border: 1.5px solid rgba(255, 255, 255, 0.65); box-shadow: 0 10px 24px rgba(244, 63, 94, 0.32); cursor: pointer; transition: all 0.2s ease;">
+                        <div style="display: flex; align-items: center; gap: 14px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.24); display: flex; align-items: center; justify-content: center;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                            </div>
+                            <span id="micBtnText" style="color: #ffffff; font-size: 1.12rem; font-weight: 800; font-family: 'Quicksand', sans-serif;">Record Cry via Mic (3s)</span>
+                        </div>
+                        <img src="/static/images/cry_archetypes/btn_record_baby_alpha.png" alt="Crying baby" style="height: 68px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12));">
                     </button>
-                    <button class="btn-speak" onclick="document.getElementById('audioFileInput').click()" style="padding: 11px 16px; border-radius: 10px;">
-                        Upload Audio
+                    <button class="btn-upload-lux" onclick="document.getElementById('audioFileInput').click()" style="flex: 1.15; background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%); border-radius: 22px; padding: 12px 18px 12px 22px; display: flex; align-items: center; justify-content: space-between; border: 1.5px solid rgba(255, 255, 255, 0.65); box-shadow: 0 10px 24px rgba(99, 102, 241, 0.32); cursor: pointer; transition: all 0.2s ease;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.24); display: flex; align-items: center; justify-content: center;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+                            </div>
+                            <div style="color: #ffffff; font-size: 1.08rem; font-weight: 800; line-height: 1.18; font-family: 'Quicksand', sans-serif; text-align: left;">Upload<br>Audio</div>
+                        </div>
+                        <img src="/static/images/cry_archetypes/btn_upload_baby_alpha.png" alt="Headphone baby" style="height: 68px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12));">
                     </button>
-                    <input type="file" id="audioFileInput" accept="audio/*" onchange="uploadAudio(this.files[0])">
+                    <input type="file" id="audioFileInput" accept="audio/*" onchange="uploadAudio(this.files[0])" style="display: none;">
                 </div>
 
                 <!-- Instant Archetype Samples -->
                 <div>
-                    <div style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">
-                        Test Archetype Cry Samples:
+                    <div style="font-size: 0.84rem; font-weight: 800; color: #64748b; letter-spacing: 0.14em; font-family: 'JetBrains Mono', monospace; margin-bottom: 14px;">
+                        TEST ARCHETYPE CRY SAMPLES:
+                        <div style="width: 42px; height: 3.5px; background: #f472b6; border-radius: 2px; margin-top: 5px;"></div>
                     </div>
-                    <div class="archetypes-grid" id="archetypesGrid">
+                    <div class="archetypes-grid-new" id="archetypesGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
                         <!-- Populated via JS -->
                     </div>
                 </div>
@@ -765,29 +783,37 @@
             vContainer.appendChild(row);
         });
 
-        // Load Preset Archetype Audio Samples
-        async function loadArchetypes() {
-            try {
-                const res = await fetch('/api/sample_audios');
-                if (!res.ok) return;
-                const samples = await res.json();
-                const grid = document.getElementById('archetypesGrid');
-                grid.innerHTML = '';
+        // Load 8 Archetype Audio Samples with new pastel card style
+        const NEW_ARCHETYPES = [
+            { id: 'sample_hungry.wav', label: 'Baby Hungry', bg: '#fdecf2', borderColor: '#fbcfe8', img: '/static/images/cry_archetypes/hungry.png' },
+            { id: 'sample_belly_pain.wav', label: 'Baby Belly Pain', bg: '#fae9fb', borderColor: '#e9d5ff', img: '/static/images/cry_archetypes/belly_pain.png' },
+            { id: 'sample_burping.wav', label: 'Burping Needed', bg: '#e7f1fd', borderColor: '#bae6fd', img: '/static/images/cry_archetypes/burping.png' },
+            { id: 'sample_tone.wav', label: 'Baby Discomfort', bg: '#fff6e7', borderColor: '#fef08a', img: '/static/images/cry_archetypes/discomfort.png' },
+            { id: 'sample_tired.wav', label: 'Tired Cry', bg: '#edf8f2', borderColor: '#bbf7d0', img: '/static/images/cry_archetypes/tired.png' },
+            { id: 'sample_hungry.wav', label: 'Hunger Cry', bg: '#f2ebfd', borderColor: '#ddd6fe', img: '/static/images/cry_archetypes/hunger_cry.png' },
+            { id: 'demo_hungry.wav', label: 'Other Cry', bg: '#fee7ed', borderColor: '#fecdd3', img: '/static/images/cry_archetypes/other.png' },
+            { id: 'sample_tone.wav', label: 'Calm / Sleeping', bg: '#ebf5fe', borderColor: '#ccfbf1', img: '/static/images/cry_archetypes/calm.png' }
+        ];
 
-                samples.forEach(s => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-archetype';
-                    btn.id = `btn-arch-${s.id}`;
-                    btn.innerHTML = `
-                        <span class="archetype-icon">${s.icon}</span>
-                        <span>${s.name}</span>
-                    `;
-                    btn.onclick = () => triggerSample(s.id);
-                    grid.appendChild(btn);
-                });
-            } catch (e) {
-                console.error("Error loading archetypes", e);
-            }
+        function loadArchetypes() {
+            const grid = document.getElementById('archetypesGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            NEW_ARCHETYPES.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'btn-archetype-card';
+                card.id = `btn-arch-${s.id}`;
+                card.style.cssText = `background: ${s.bg}; border: 2px solid ${s.borderColor}; border-radius: 20px; padding: 12px 10px 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 6px 16px rgba(0,0,0,0.03); user-select: none;`;
+                card.innerHTML = `
+                    <img src="${s.img}" alt="${s.label}" style="width: 100%; height: 94px; object-fit: contain; margin-bottom: 8px;">
+                    <div style="font-size: 0.94rem; font-weight: 700; color: #334155; text-align: center; font-family: 'Quicksand', 'Outfit', sans-serif;">${s.label}</div>
+                `;
+                card.onmouseenter = () => { card.style.transform = 'translateY(-4px)'; card.style.boxShadow = '0 12px 24px rgba(0,0,0,0.07)'; };
+                card.onmouseleave = () => { card.style.transform = 'none'; card.style.boxShadow = '0 6px 16px rgba(0,0,0,0.03)'; };
+                card.onclick = () => triggerSample(s.id);
+                grid.appendChild(card);
+            });
         }
         loadArchetypes();
 

@@ -38,6 +38,17 @@ class EmotionVisualizer:
         cv2.line(img, (x2, y2), (x2 - length, y2), color, thickness, cv2.LINE_AA)
         cv2.line(img, (x2, y2), (x2, y2 - length), color, thickness, cv2.LINE_AA)
 
+    def _blend_rect(self, canvas: np.ndarray, x1: int, y1: int, x2: int, y2: int, color: tuple, alpha: float):
+        """Blends a semi-transparent colored rectangle strictly within ROI, avoiding full-image copies."""
+        h, w = canvas.shape[:2]
+        rx1, rx2 = max(0, min(x1, x2)), min(w, max(x1, x2))
+        ry1, ry2 = max(0, min(y1, y2)), min(h, max(y1, y2))
+        if rx2 <= rx1 or ry2 <= ry1:
+            return
+        roi = canvas[ry1:ry2, rx1:rx2]
+        color_block = np.full_like(roi, color, dtype=np.uint8)
+        cv2.addWeighted(color_block, alpha, roi, 1.0 - alpha, 0, roi)
+
     def draw_detections(self, frame: np.ndarray, results: list, fps: float = 0.0, latency_ms: float = 0.0) -> np.ndarray:
         """Renders detections, emotion tags, and probability bars onto frame."""
         canvas = frame.copy()
@@ -53,10 +64,8 @@ class EmotionVisualizer:
             probs = emotion_data.get("probabilities", {})
             
             # 1. Subtle bounding box with glowing corners
-            # Semi-transparent inner tint
-            overlay = canvas.copy()
-            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, 1)
-            cv2.addWeighted(overlay, 0.4, canvas, 0.6, 0, canvas)
+            self._blend_rect(canvas, x1, y1, x2, y2, color, alpha=0.15)
+            cv2.rectangle(canvas, (x1, y1), (x2, y2), color, 1)
             
             # Corner targeting brackets
             self._draw_corner_brackets(canvas, (x1, y1), (x2, y2), color, length=20, thickness=2)
@@ -70,10 +79,8 @@ class EmotionVisualizer:
             badge_x1 = x1
             badge_x2 = min(w, x1 + tw + 18)
             
-            # Dark pill background for text
-            pill_overlay = canvas.copy()
-            cv2.rectangle(pill_overlay, (badge_x1, badge_y1), (badge_x2, badge_y2), (20, 20, 25), -1)
-            cv2.addWeighted(pill_overlay, 0.75, canvas, 0.25, 0, canvas)
+            # Dark pill background for text using fast ROI blend
+            self._blend_rect(canvas, badge_x1, badge_y1, badge_x2, badge_y2, (20, 20, 25), alpha=0.75)
             
             # Accent line on left of badge
             cv2.rectangle(canvas, (badge_x1, badge_y1), (badge_x1 + 3, badge_y2), color, -1)
@@ -101,9 +108,7 @@ class EmotionVisualizer:
                     px = x1
                     py = min(h - total_panel_h, y2 + 10)
                     
-                panel_overlay = canvas.copy()
-                cv2.rectangle(panel_overlay, (px - 5, py - 5), (px + bar_w + 55, py + total_panel_h), (15, 15, 20), -1)
-                cv2.addWeighted(panel_overlay, 0.7, canvas, 0.3, 0, canvas)
+                self._blend_rect(canvas, px - 5, py - 5, px + bar_w + 55, py + total_panel_h, (15, 15, 20), alpha=0.70)
                 
                 for idx, (emo, p) in enumerate(probs.items()):
                     item_y = py + idx * (bar_h + bar_gap) + 8
@@ -129,9 +134,7 @@ class EmotionVisualizer:
 
         # 4. Top Telemetry Banner
         if self.show_telemetry:
-            header_overlay = canvas.copy()
-            cv2.rectangle(header_overlay, (0, 0), (w, 36), (12, 14, 18), -1)
-            cv2.addWeighted(header_overlay, 0.85, canvas, 0.15, 0, canvas)
+            self._blend_rect(canvas, 0, 0, w, 36, (12, 14, 18), alpha=0.85)
             
             # Title
             cv2.putText(canvas, "ULTRA-LIGHT FACE & EMOTION AI", (14, 23),

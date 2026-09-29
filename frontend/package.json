@@ -5,5 +5,10 @@
   "description": "3D Multimodal Infant Distress Monitor Frontend",
   "scripts": {
     "build": "node build.js"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
   }
 }

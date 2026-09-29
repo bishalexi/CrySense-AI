@@ -292,15 +292,12 @@ const VideoFeedCard = ({ mood = 'Neutral' }) => {
               key={feedUrl}
               src={feedUrl}
               alt="Real-Time Neural Video Feed"
-              onError={(e) => {
-                // If multipart stream stalls, smoothly fallback to snapshot poller
-                e.currentTarget.onerror = null;
-                const poller = setInterval(() => {
+              onError={() => {
+                setTimeout(() => {
                   if (cameraMode !== 'browser') {
-                    e.currentTarget.src = '/api/snapshot?t=' + Date.now();
+                    setFeedUrl('/video_feed?t=' + Date.now());
                   }
-                }, 100);
-                return () => clearInterval(poller);
+                }, 1500);
               }}
               style={{
                 width: '100%',

@@ -447,7 +447,7 @@ function App() {
       "x-dynamic": "false",
       children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Routes, {
         children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Route, {
-          path: "/",
+          path: "*",
           element: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxDEV)(_pages_Dashboard__WEBPACK_IMPORTED_MODULE_3__["default"], {
             "x-file-name": "App",
             "x-line-number": "15",
@@ -625,436 +625,386 @@ const AcousticClassifierCard = ({
   selectedSample
 }) => {
   _s();
-  const [countdown, setCountdown] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0);
+  const [countdown, setCountdown] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(0);
+  const [activeId, setActiveId] = (0, react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+
   const startRecord = () => {
     if (recording) return;
-    onRecord && onRecord();
+    setCountdown(3);
+    const iv = setInterval(() => {
+      setCountdown(c => {
+        if (c <= 1) {
+          clearInterval(iv);
+          onRecord && onRecord();
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
   };
-  return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(_Tilt3D__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    intensity: 4,
-    className: "glass-card",
+
+  const handleUploadClick = () => {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'audio/*';
+    inp.onchange = e => {
+      const file = e.target.files && e.target.files[0];
+      if (file && onUpload) {
+        onUpload(file);
+      }
+    };
+    inp.click();
+  };
+
+  const handleCardClick = async (item) => {
+    setActiveId(item.id);
+    try {
+      const audio = new Audio('/audio_samples/' + item.sample);
+      audio.play().catch(() => {});
+    } catch(e) {}
+
+    try {
+      const res = await fetch('/api/audio_classify?sample=' + item.sample, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        onSample && onSample({ id: item.id, label: item.label, data });
+      } else {
+        onSample && onSample(item);
+      }
+    } catch (err) {
+      onSample && onSample(item);
+    }
+
+    setTimeout(() => {
+      setActiveId(null);
+    }, 3000);
+  };
+
+  const archetypeItems = [
+    { id: 'hungry', label: 'Baby Hungry', sample: 'sample_hungry.wav', bg: '#fdecf2', borderColor: '#fbcfe8', img: '/static/images/cry_archetypes/hungry.png' },
+    { id: 'belly_pain', label: 'Baby Belly Pain', sample: 'sample_belly_pain.wav', bg: '#fae9fb', borderColor: '#e9d5ff', img: '/static/images/cry_archetypes/belly_pain.png' },
+    { id: 'burping', label: 'Burping Needed', sample: 'sample_burping.wav', bg: '#e7f1fd', borderColor: '#bae6fd', img: '/static/images/cry_archetypes/burping.png' },
+    { id: 'discomfort', label: 'Baby Discomfort', sample: 'sample_tone.wav', bg: '#fff6e7', borderColor: '#fef08a', img: '/static/images/cry_archetypes/discomfort.png' },
+    { id: 'tired', label: 'Tired Cry', sample: 'sample_tired.wav', bg: '#edf8f2', borderColor: '#bbf7d0', img: '/static/images/cry_archetypes/tired.png' },
+    { id: 'hunger_cry', label: 'Hunger Cry', sample: 'sample_hungry.wav', bg: '#f2ebfd', borderColor: '#ddd6fe', img: '/static/images/cry_archetypes/hunger_cry.png' },
+    { id: 'other', label: 'Other Cry', sample: 'demo_hungry.wav', bg: '#fee7ed', borderColor: '#fecdd3', img: '/static/images/cry_archetypes/other.png' },
+    { id: 'calm', label: 'Calm / Sleeping', sample: 'sample_tone.wav', bg: '#ebf5fe', borderColor: '#ccfbf1', img: '/static/images/cry_archetypes/calm.png' }
+  ];
+
+  const h = react__WEBPACK_IMPORTED_MODULE_0__.createElement;
+
+  return h('div', {
+    className: 'glass-card',
     style: {
-      padding: '18px 20px'
-    },
-    "x-file-name": "AcousticClassifierCard",
-    "x-line-number": "42",
-    "x-column": "4",
-    "x-component": "Tilt3D",
-    "x-id": "AcousticClassifierCard_42_4",
-    "x-dynamic": "true",
-    children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+      background: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: 24,
+      padding: '22px 24px',
+      border: '2px solid rgba(244, 114, 182, 0.35)',
+      boxShadow: '0 20px 40px rgba(244, 114, 182, 0.16), 0 2px 10px rgba(0, 0, 0, 0.04)',
+      marginBottom: 20
+    }
+  }, [
+    h('div', {
+      key: 'hdr',
       style: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 14
-      },
-      "x-file-name": "AcousticClassifierCard",
-      "x-line-number": "43",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "AcousticClassifierCard_43_6",
-      "x-dynamic": "false",
-      children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+        marginBottom: 18
+      }
+    }, [
+      h('div', {
+        key: 'hdr-left',
         style: {
           display: 'inline-flex',
           alignItems: 'center',
-          gap: 8,
-          fontSize: '0.92rem',
-          fontWeight: 700,
-          color: '#e2e8f0'
-        },
-        "x-file-name": "AcousticClassifierCard",
-        "x-line-number": "44",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "AcousticClassifierCard_44_8",
-        "x-dynamic": "false",
-        children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_12__["default"], {
-          size: 16,
-          color: "#a855f7",
-          "x-file-name": "AcousticClassifierCard",
-          "x-line-number": "54",
-          "x-column": "10",
-          "x-component": "Waves",
-          "x-id": "AcousticClassifierCard_54_10",
-          "x-dynamic": "false"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 54,
-          columnNumber: 11
-        }, undefined), " Acoustic Baby Cry Classifier"]
-      }, void 0, true, {
-        fileName: _jsxFileName,
-        lineNumber: 44,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("span", {
-        className: "card-subtle mono",
-        "x-file-name": "AcousticClassifierCard",
-        "x-line-number": "56",
-        "x-column": "8",
-        "x-component": "span",
-        "x-id": "AcousticClassifierCard_56_8",
-        "x-dynamic": "false",
-        children: "194-DIM ACOUSTIC SVC"
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 56,
-        columnNumber: 9
-      }, undefined)]
-    }, void 0, true, {
-      fileName: _jsxFileName,
-      lineNumber: 43,
-      columnNumber: 7
-    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+          gap: 10,
+          fontSize: '1.2rem',
+          fontWeight: 800,
+          color: '#334155',
+          fontFamily: "'Quicksand', 'Outfit', sans-serif"
+        }
+      }, [
+        h('svg', {
+          key: 'wave-icon',
+          width: 24,
+          height: 24,
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          stroke: '#8b5cf6',
+          strokeWidth: 2.5,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round'
+        }, [
+          h('path', { key: 'p1', d: 'M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1' }),
+          h('path', { key: 'p2', d: 'M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1' }),
+          h('path', { key: 'p3', d: 'M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1' })
+        ]),
+        h('span', { key: 'title' }, 'Acoustic Baby Cry Classifier')
+      ]),
+      h('span', {
+        key: 'svc-badge',
+        style: {
+          fontSize: '0.84rem',
+          fontWeight: 800,
+          color: '#f43f5e',
+          letterSpacing: '0.12em',
+          fontFamily: "'JetBrains Mono', monospace"
+        }
+      }, '194-DIM ACOUSTIC SVC')
+    ]),
+
+    h('div', {
+      key: 'btn-row',
       style: {
         display: 'flex',
-        gap: 12,
-        marginBottom: 18
-      },
-      "x-file-name": "AcousticClassifierCard",
-      "x-line-number": "59",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "AcousticClassifierCard_59_6",
-      "x-dynamic": "false",
-      children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+        gap: 16,
+        marginBottom: 22,
+        alignItems: 'stretch'
+      }
+    }, [
+      h('div', {
+        key: 'rec-btn',
+        onClick: startRecord,
         style: {
-          flex: 2
-        },
-        "x-file-name": "AcousticClassifierCard",
-        "x-line-number": "60",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "AcousticClassifierCard_60_8",
-        "x-dynamic": "false",
-        children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(_Button3D__WEBPACK_IMPORTED_MODULE_4__["default"], {
-          wide: true,
-          size: "lg",
-          onClick: startRecord,
-          color: recording ? '#f43f5e' : '#ef4444',
-          shadow: recording ? '#9f1239' : '#b91c1c',
-          icon: recording ? /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(WaveBars, {
-            active: true,
-            "x-file-name": "AcousticClassifierCard",
-            "x-line-number": "67",
-            "x-column": "30",
-            "x-component": "WaveBars",
-            "x-id": "AcousticClassifierCard_67_30",
-            "x-dynamic": "false"
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 67,
-            columnNumber: 31
-          }, undefined) : /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_7__["default"], {
-            size: 18,
-            "x-file-name": "AcousticClassifierCard",
-            "x-line-number": "67",
-            "x-column": "52",
-            "x-component": "Mic",
-            "x-id": "AcousticClassifierCard_67_52",
-            "x-dynamic": "false"
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 67,
-            columnNumber: 53
-          }, undefined),
-          "x-file-name": "AcousticClassifierCard",
-          "x-line-number": "61",
-          "x-column": "10",
-          "x-component": "Button3D",
-          "x-id": "AcousticClassifierCard_61_10",
-          "x-dynamic": "true",
-          "x-source-type": "computed",
-          "x-source-editable": "false",
-          children: recording ? 'Recording...' : countdown > 0 ? `Starting in ${countdown}...` : 'Record Cry via Mic (3s)'
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 61,
-          columnNumber: 11
-        }, undefined)
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 60,
-        columnNumber: 9
-      }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+          flex: 1.85,
+          background: recording ? 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)' : 'linear-gradient(135deg, #fb7185 0%, #f43f5e 48%, #e11d48 100%)',
+          borderRadius: 22,
+          padding: '12px 20px 12px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          boxShadow: recording ? '0 10px 28px rgba(225, 29, 72, 0.55)' : '0 10px 24px rgba(244, 63, 94, 0.32), 0 2px 6px rgba(0,0,0,0.04)',
+          userSelect: 'none',
+          border: '1.5px solid rgba(255, 255, 255, 0.65)',
+          transition: 'all 0.2s ease'
+        }
+      }, [
+        h('div', {
+          key: 'rec-left',
+          style: { display: 'flex', alignItems: 'center', gap: 14 }
+        }, [
+          h('div', {
+            key: 'mic-badge',
+            style: {
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.24)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }
+          }, [
+            h('svg', {
+              key: 'mic-svg',
+              width: 24,
+              height: 24,
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: '#ffffff',
+              strokeWidth: 2.5,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            }, [
+              h('path', { key: 'm1', d: 'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z' }),
+              h('path', { key: 'm2', d: 'M19 10v2a7 7 0 0 1-14 0v-2' }),
+              h('line', { key: 'm3', x1: 12, x2: 12, y1: 19, y2: 22 })
+            ])
+          ]),
+          h('span', {
+            key: 'mic-txt',
+            style: { color: '#ffffff', fontSize: '1.12rem', fontWeight: 800, fontFamily: "'Quicksand', 'Inter', sans-serif" }
+          }, recording ? 'Recording Cry...' : countdown > 0 ? `Starting in ${countdown}...` : 'Record Cry via Mic (3s)')
+        ]),
+        h('img', {
+          key: 'rec-baby',
+          src: '/static/images/cry_archetypes/btn_record_baby_alpha.png',
+          alt: 'Crying baby',
+          style: { height: 68, width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))' }
+        })
+      ]),
+
+      h('div', {
+        key: 'up-btn',
+        onClick: handleUploadClick,
         style: {
-          flex: 1
-        },
-        "x-file-name": "AcousticClassifierCard",
-        "x-line-number": "72",
-        "x-column": "8",
-        "x-component": "div",
-        "x-id": "AcousticClassifierCard_72_8",
-        "x-dynamic": "false",
-        children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(_Button3D__WEBPACK_IMPORTED_MODULE_4__["default"], {
-          wide: true,
-          size: "lg",
-          color: "#8b5cf6",
-          shadow: "#6d28d9",
-          icon: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(lucide_react__WEBPACK_IMPORTED_MODULE_11__["default"], {
-            size: 16
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 78,
-            columnNumber: 19
-          }, undefined),
-          onClick: () => {
-            const inp = document.createElement('input');
-            inp.type = 'file';
-            inp.accept = 'audio/*';
-            inp.onchange = e => {
-              const file = e.target.files && e.target.files[0];
-              if (file && onUpload) {
-                onUpload(file);
-              }
-            };
-            inp.click();
-          },
-          children: "Upload Audio"
-        }, void 0, false, {
-          fileName: _jsxFileName,
-          lineNumber: 73,
-          columnNumber: 11
-        }, undefined)
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 72,
-        columnNumber: 9
-      }, undefined)]
-    }, void 0, true, {
-      fileName: _jsxFileName,
-      lineNumber: 59,
-      columnNumber: 7
-    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
-      style: {
-        fontSize: '0.7rem',
-        color: '#94a3b8',
-        letterSpacing: '0.15em',
-        marginBottom: 12,
-        fontFamily: 'JetBrains Mono, monospace'
-      },
-      "x-file-name": "AcousticClassifierCard",
-      "x-line-number": "79",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "AcousticClassifierCard_79_6",
-      "x-dynamic": "false",
-      children: "TEST ARCHETYPE CRY SAMPLES:"
-    }, void 0, false, {
-      fileName: _jsxFileName,
-      lineNumber: 79,
-      columnNumber: 7
-    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+          flex: 1.15,
+          background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
+          borderRadius: 22,
+          padding: '12px 18px 12px 22px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          boxShadow: '0 10px 24px rgba(99, 102, 241, 0.32), 0 2px 6px rgba(0,0,0,0.04)',
+          userSelect: 'none',
+          border: '1.5px solid rgba(255, 255, 255, 0.65)',
+          transition: 'all 0.2s ease'
+        }
+      }, [
+        h('div', {
+          key: 'up-left',
+          style: { display: 'flex', alignItems: 'center', gap: 12 }
+        }, [
+          h('div', {
+            key: 'cloud-badge',
+            style: {
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              background: 'rgba(255, 255, 255, 0.24)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }
+          }, [
+            h('svg', {
+              key: 'cloud-svg',
+              width: 24,
+              height: 24,
+              viewBox: '0 0 24 24',
+              fill: 'none',
+              stroke: '#ffffff',
+              strokeWidth: 2.5,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round'
+            }, [
+              h('path', { key: 'c1', d: 'M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242' }),
+              h('path', { key: 'c2', d: 'M12 12v9' }),
+              h('path', { key: 'c3', d: 'm16 16-4-4-4 4' })
+            ])
+          ]),
+          h('div', {
+            key: 'up-txt',
+            style: { color: '#ffffff', fontSize: '1.08rem', fontWeight: 800, lineHeight: 1.18, fontFamily: "'Quicksand', 'Inter', sans-serif" }
+          }, [
+            'Upload',
+            h('br', { key: 'br' }),
+            'Audio'
+          ])
+        ]),
+        h('img', {
+          key: 'up-baby',
+          src: '/static/images/cry_archetypes/btn_upload_baby_alpha.png',
+          alt: 'Headphone baby',
+          style: { height: 68, width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.12))' }
+        })
+      ])
+    ]),
+
+    h('div', {
+      key: 'sub-hdr',
+      style: { marginBottom: 16 }
+    }, [
+      h('div', {
+        key: 'sub-title',
+        style: {
+          fontSize: '0.84rem',
+          fontWeight: 800,
+          color: '#64748b',
+          letterSpacing: '0.14em',
+          fontFamily: "'JetBrains Mono', monospace",
+          display: 'inline-block'
+        }
+      }, [
+        'TEST ARCHETYPE CRY SAMPLES:',
+        h('div', {
+          key: 'accent-underline',
+          style: {
+            width: 42,
+            height: 3.5,
+            background: '#f472b6',
+            borderRadius: 2,
+            marginTop: 5
+          }
+        })
+      ])
+    ]),
+
+    h('div', {
+      key: 'cards-grid',
       style: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: 10
-      },
-      "x-file-name": "AcousticClassifierCard",
-      "x-line-number": "83",
-      "x-column": "6",
-      "x-component": "div",
-      "x-id": "AcousticClassifierCard_83_6",
-      "x-dynamic": "true",
-      "x-source-type": "computed",
-      "x-source-editable": "false",
-      children: _mock__WEBPACK_IMPORTED_MODULE_14__.archetypeCries.map(s => {
-        const Icon = iconMap[s.icon] || lucide_react__WEBPACK_IMPORTED_MODULE_10__["default"];
-        const active = selectedSample === s.id;
-        return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(framer_motion__WEBPACK_IMPORTED_MODULE_2__.motion.button, {
-          whileHover: {
-            y: -4,
-            rotateX: -6,
-            rotateY: 4,
-            scale: 1.03
-          },
-          whileTap: {
-            scale: 0.96
-          },
-          onClick: () => onSample && onSample(s),
-          style: {
-            background: active ? `linear-gradient(135deg, ${s.tone}55, ${s.tone}22)` : 'rgba(15, 23, 42, 0.6)',
-            border: `1px solid ${active ? s.tone : 'rgba(148,163,184,0.15)'}`,
-            borderRadius: 12,
-            padding: '14px 8px',
-            color: '#e2e8f0',
-            fontSize: '0.78rem',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 6,
-            transformStyle: 'preserve-3d',
-            boxShadow: active ? `0 8px 18px ${s.tone}55, inset 0 1px 0 rgba(255,255,255,0.1)` : '0 4px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)'
-          },
-          "x-file-name": "AcousticClassifierCard",
-          "x-line-number": "94",
-          "x-column": "12",
-          "x-component": "button",
-          "x-id": "AcousticClassifierCard_94_12",
-          "x-dynamic": "true",
-          "x-source-type": "static-imported",
-          "x-source-var": "archetypeCries",
-          "x-source-file": "../mock",
-          "x-source-file-abs": "/app/frontend/src/mock.js",
-          "x-source-line": "28",
-          "x-source-path": "label",
-          "x-source-editable": "true",
-          "x-array-var": "archetypeCries",
-          "x-array-file": "../mock",
-          "x-array-line": "28",
-          "x-array-item-param": "s",
-          children: [/*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(framer_motion__WEBPACK_IMPORTED_MODULE_2__.motion.span, {
-            animate: active ? {
-              y: [0, -3, 0]
-            } : {},
-            transition: {
-              duration: 1.2,
-              repeat: Infinity
-            },
-            style: {
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: `${s.tone}22`,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: s.tone
-            },
-            "x-file-name": "AcousticClassifierCard",
-            "x-line-number": "119",
-            "x-column": "14",
-            "x-component": "span",
-            "x-id": "AcousticClassifierCard_119_14",
-            "x-dynamic": "false",
-            children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(Icon, {
-              size: 18,
-              "x-file-name": "AcousticClassifierCard",
-              "x-line-number": "133",
-              "x-column": "16",
-              "x-component": "Icon",
-              "x-id": "AcousticClassifierCard_133_16",
-              "x-dynamic": "true",
-              "x-source-type": "static-imported",
-              "x-source-var": "archetypeCries",
-              "x-source-file": "../mock",
-              "x-source-file-abs": "/app/frontend/src/mock.js",
-              "x-source-line": "28",
-              "x-source-editable": "true",
-              "x-array-var": "archetypeCries",
-              "x-array-file": "../mock",
-              "x-array-line": "28",
-              "x-array-item-param": "s"
-            }, void 0, false, {
-              fileName: _jsxFileName,
-              lineNumber: 133,
-              columnNumber: 17
-            }, undefined)
-          }, void 0, false, {
-            fileName: _jsxFileName,
-            lineNumber: 119,
-            columnNumber: 15
-          }, undefined), s.label]
-        }, s.id, true, {
-          fileName: _jsxFileName,
-          lineNumber: 94,
-          columnNumber: 13
-        }, undefined);
-      })
-    }, void 0, false, {
-      fileName: _jsxFileName,
-      lineNumber: 83,
-      columnNumber: 7
-    }, undefined), /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(framer_motion__WEBPACK_IMPORTED_MODULE_1__.AnimatePresence, {
-      "x-file-name": "AcousticClassifierCard",
-      "x-line-number": "141",
-      "x-column": "6",
-      "x-component": "AnimatePresence",
-      "x-id": "AcousticClassifierCard_141_6",
-      "x-dynamic": "true",
-      "x-source-type": "computed",
-      "x-source-editable": "false",
-      children: selectedSample && /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)(framer_motion__WEBPACK_IMPORTED_MODULE_2__.motion.div, {
-        initial: {
-          opacity: 0,
-          height: 0
-        },
-        animate: {
-          opacity: 1,
-          height: 'auto'
-        },
-        exit: {
-          opacity: 0,
-          height: 0
-        },
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 14
+      }
+    }, archetypeItems.map(item => {
+      const isSelected = activeId === item.id || selectedSample === item.id;
+      return h('div', {
+        key: item.id,
+        onClick: () => handleCardClick(item),
         style: {
-          overflow: 'hidden',
-          marginTop: 12
-        },
-        "x-file-name": "AcousticClassifierCard",
-        "x-line-number": "143",
-        "x-column": "10",
-        "x-component": "div",
-        "x-id": "AcousticClassifierCard_143_10",
-        "x-dynamic": "false",
-        children: /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("div", {
+          background: item.bg,
+          border: isSelected ? '2.5px solid #f43f5e' : `2px solid ${item.borderColor}`,
+          borderRadius: 20,
+          padding: '12px 10px 14px 10px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          boxShadow: isSelected ? '0 12px 28px rgba(244, 63, 94, 0.32), 0 0 0 3px rgba(244, 114, 182, 0.25)' : '0 6px 16px rgba(0, 0, 0, 0.03)',
+          transform: isSelected ? 'translateY(-4px)' : 'none',
+          transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          position: 'relative',
+          overflow: 'hidden'
+        }
+      }, [
+        h('img', {
+          key: 'card-img',
+          src: item.img,
+          alt: item.label,
           style: {
-            padding: '10px 12px',
-            background: 'rgba(56, 189, 248, 0.08)',
-            border: '1px solid rgba(56, 189, 248, 0.25)',
-            borderRadius: 8,
-            fontSize: '0.78rem',
-            color: '#7dd3fc',
-            fontFamily: 'JetBrains Mono, monospace'
-          },
-          "x-file-name": "AcousticClassifierCard",
-          "x-line-number": "149",
-          "x-column": "12",
-          "x-component": "div",
-          "x-id": "AcousticClassifierCard_149_12",
-          "x-dynamic": "true",
-          "x-source-type": "prop",
-          "x-source-var": "selectedSample",
-          "x-source-editable": "false",
-          children: ["\u25C8 Analyzing sample: ", /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_15__.jsxDEV)("span", {
-            "data-ve-dynamic": "true",
-            "x-excluded": "true",
-            style: {
-              display: "contents"
-            },
-            "x-file-name": "AcousticClassifierCard",
-            "x-line-number": "149",
-            "x-column": "12",
-            "x-component": "div",
-            "x-id": "AcousticClassifierCard_149_12_expr1",
-            "x-dynamic": "true",
-            "x-source-type": "prop",
-            "x-source-var": "selectedSample",
-            "x-source-editable": "false",
-            children: selectedSample
-          }, void 0, false), "..."]
-        }, void 0, true, {
-          fileName: _jsxFileName,
-          lineNumber: 149,
-          columnNumber: 13
-        }, undefined)
-      }, void 0, false, {
-        fileName: _jsxFileName,
-        lineNumber: 143,
-        columnNumber: 11
-      }, undefined)
-    }, void 0, false, {
-      fileName: _jsxFileName,
-      lineNumber: 141,
-      columnNumber: 7
-    }, undefined)]
-  }, void 0, true, {
-    fileName: _jsxFileName,
-    lineNumber: 42,
-    columnNumber: 5
-  }, undefined);
+            width: '100%',
+            height: 94,
+            objectFit: 'contain',
+            marginBottom: 8,
+            transition: 'transform 0.2s ease'
+          }
+        }),
+        h('div', {
+          key: 'card-lbl',
+          style: {
+            fontSize: '0.94rem',
+            fontWeight: 700,
+            color: '#334155',
+            textAlign: 'center',
+            fontFamily: "'Quicksand', 'Outfit', sans-serif"
+          }
+        }, item.label),
+        isSelected && h('div', {
+          key: 'waves',
+          style: { display: 'flex', gap: 3, alignItems: 'center', marginTop: 4 }
+        }, [
+          h('span', { key: 'w1', style: { width: 3, height: 10, background: '#f43f5e', borderRadius: 2 } }),
+          h('span', { key: 'w2', style: { width: 3, height: 16, background: '#f43f5e', borderRadius: 2 } }),
+          h('span', { key: 'w3', style: { width: 3, height: 8, background: '#f43f5e', borderRadius: 2 } })
+        ])
+      ]);
+    })),
+
+    activeId && h('div', {
+      key: 'status-banner',
+      style: {
+        marginTop: 14,
+        padding: '10px 14px',
+        background: 'rgba(244, 114, 182, 0.12)',
+        border: '1.5px solid rgba(244, 114, 182, 0.35)',
+        borderRadius: 12,
+        fontSize: '0.84rem',
+        color: '#be185d',
+        fontFamily: "'JetBrains Mono', monospace",
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8
+      }
+    }, [
+      h('span', { key: 'sym' }, '◈'),
+      h('span', { key: 'txt' }, 'Analyzing Archetype Cry & Fusing with Face Telemetry...')
+    ])
+  ]);
 };
 _s(AcousticClassifierCard, "He+rRli7Gd+T2rDECGtGyNsdU8Y=");
 _c2 = AcousticClassifierCard;
@@ -3031,52 +2981,556 @@ var _jsxFileName = "/app/frontend/src/components/Starfield.jsx",
 
 const Starfield = () => {
   _s();
-  const canvasRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+  const canvasRef = (0, react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+
+  (0, react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
-    const stars = Array.from({
-      length: 140
-    }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      z: Math.random() * 1.5 + 0.2,
-      r: Math.random() * 1.4 + 0.3,
-      hue: Math.random() > 0.5 ? 200 : 280
-    }));
-    let raf;
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      for (const s of stars) {
-        s.y += s.z * 0.35;
-        if (s.y > h) {
-          s.y = 0;
-          s.x = Math.random() * w;
-        }
-        ctx.beginPath();
-        ctx.fillStyle = `hsla(${s.hue}, 80%, 70%, ${0.35 + s.z * 0.35})`;
-        ctx.shadowColor = `hsla(${s.hue}, 90%, 65%, 0.9)`;
-        ctx.shadowBlur = 6;
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    const resize = () => {
+
+    let w = (canvas.width = window.innerWidth);
+    let h = (canvas.height = window.innerHeight);
+
+    const handleResize = () => {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
     };
-    window.addEventListener('resize', resize);
-    draw();
+    window.addEventListener('resize', handleResize);
+
+    // Fluffy White Clouds with Rosy Cheeks
+    const clouds = [
+      { x: w * 0.05, y: h * 0.12, scale: 1.2, speed: 0.22, opacity: 0.85 },
+      { x: w * 0.45, y: h * 0.06, scale: 0.95, speed: 0.16, opacity: 0.8 },
+      { x: w * 0.78, y: h * 0.22, scale: 1.05, speed: 0.26, opacity: 0.85 },
+      { x: w * 0.22, y: h * 0.45, scale: 0.85, speed: 0.18, opacity: 0.75 },
+      { x: w * 0.65, y: h * 0.62, scale: 1.15, speed: 0.24, opacity: 0.82 },
+      { x: -w * 0.12, y: h * 0.78, scale: 1.0, speed: 0.2, opacity: 0.8 }
+    ];
+
+    // Twinkling Baby Pink, White & Gold Stars
+    const starColors = [
+      '#f472b6', '#ec4899', '#ffffff', '#fbbf24', '#fbcfe8', '#fda4af'
+    ];
+
+    const stars = Array.from({ length: 90 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: Math.random() * 4.5 + 2.5,
+      color: starColors[Math.floor(Math.random() * starColors.length)],
+      twinkleSpeed: Math.random() * 0.035 + 0.018,
+      phase: Math.random() * Math.PI * 2,
+      rotation: Math.random() * Math.PI,
+      rotSpeed: (Math.random() - 0.5) * 0.012,
+      isFourPoint: Math.random() > 0.3
+    }));
+
+    // Floating Baby Elements in White & Pink
+    const dreamTypes = ['bottle', 'teddy', 'pacifier', 'bow', 'footprint', 'balloon', 'bubble', 'cloud'];
+    const dreamItems = Array.from({ length: 26 }, (_, i) => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      type: dreamTypes[i % dreamTypes.length],
+      scale: Math.random() * 0.35 + 0.75,
+      speedY: Math.random() * 0.4 + 0.28,
+      wobbleSpeed: Math.random() * 0.02 + 0.012,
+      wobbleDist: Math.random() * 25 + 15,
+      phase: Math.random() * Math.PI * 2,
+      rotation: (Math.random() - 0.5) * 0.35,
+      rotSpeed: (Math.random() - 0.5) * 0.008,
+      opacity: Math.random() * 0.25 + 0.75,
+      color: starColors[Math.floor(Math.random() * starColors.length)]
+    }));
+
+    // Interactive Pink Fairy Stardust Trail
+    const stardust = [];
+    const handlePointerMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      for (let i = 0; i < 3; i++) {
+        stardust.push({
+          x: px + (Math.random() - 0.5) * 24,
+          y: py + (Math.random() - 0.5) * 24,
+          vx: (Math.random() - 0.5) * 1.6,
+          vy: Math.random() * -1.8 - 0.6,
+          life: 1.0,
+          decay: Math.random() * 0.025 + 0.02,
+          size: Math.random() * 3.5 + 2,
+          color: starColors[Math.floor(Math.random() * starColors.length)]
+        });
+      }
+      if (stardust.length > 60) stardust.splice(0, 15);
+    };
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+
+    let animId;
+    let t = 0;
+
+    const drawFourPointStar = (cx, cy, outerRadius, color, alpha) => {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.fillStyle = color;
+      ctx.shadowColor = 'rgba(244, 114, 182, 0.6)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      const r = outerRadius;
+      ctx.moveTo(0, -r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.quadraticCurveTo(0, 0, 0, r);
+      ctx.quadraticCurveTo(0, 0, -r, 0);
+      ctx.quadraticCurveTo(0, 0, 0, -r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    };
+
+    const drawCloud = (cx, cy, scale, opacity, withFace) => {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(244, 114, 182, 0.28)';
+      ctx.shadowBlur = 18;
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 32, 0, Math.PI * 2);
+      ctx.arc(26, -12, 26, 0, Math.PI * 2);
+      ctx.arc(52, 2, 28, 0, Math.PI * 2);
+      ctx.arc(-26, -8, 24, 0, Math.PI * 2);
+      ctx.arc(-46, 4, 22, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+
+      if (withFace) {
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.7)';
+        ctx.beginPath(); ctx.arc(-14, 4, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(22, 4, 5, 0, Math.PI * 2); ctx.fill();
+
+        ctx.strokeStyle = '#be185d';
+        ctx.lineWidth = 1.8;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(-14, -4, 4, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(22, -4, 4, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(4, 5, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+      }
+
+      ctx.restore();
+    };
+
+    const drawMoon = (cx, cy, time) => {
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      const breathe = Math.sin(time * 0.002) * 10;
+      const haloGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, 90 + breathe);
+      haloGrad.addColorStop(0, 'rgba(254, 240, 138, 0.45)');
+      haloGrad.addColorStop(0.5, 'rgba(251, 113, 133, 0.22)');
+      haloGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 90 + breathe, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawCloud(10, 36, 0.65, 0.95, false);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, 42, 0, Math.PI * 2, false);
+      ctx.arc(16, -12, 38, 0, Math.PI * 2, true);
+      ctx.closePath();
+      const moonGrad = ctx.createLinearGradient(-35, -35, 25, 35);
+      moonGrad.addColorStop(0, '#fffbeb');
+      moonGrad.addColorStop(0.5, '#fde047');
+      moonGrad.addColorStop(1, '#f59e0b');
+      ctx.fillStyle = moonGrad;
+      ctx.shadowColor = 'rgba(251, 113, 133, 0.5)';
+      ctx.shadowBlur = 16;
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.strokeStyle = '#9d174d';
+      ctx.lineWidth = 2.0;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(-11, -3, 7, 0.2 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-11, 4); ctx.lineTo(-11, 8);
+      ctx.moveTo(-16, 3); ctx.lineTo(-18, 6);
+      ctx.moveTo(-6, 3); ctx.lineTo(-4, 6);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(-8, 12, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(-4, 14, 5.0, 0.1 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(-10, -36);
+      ctx.rotate(-0.35 + Math.sin(time * 0.002) * 0.08);
+
+      ctx.beginPath();
+      ctx.moveTo(-14, 7);
+      ctx.quadraticCurveTo(6, -26, 32, -16);
+      ctx.quadraticCurveTo(8, 4, 14, 9);
+      ctx.closePath();
+      ctx.fillStyle = '#f472b6';
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(-2, -6, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(10, -8, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(20, -12, 2.5, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(-16, 5, 30, 8, 4);
+      } else {
+        ctx.rect(-16, 5, 30, 8);
+      }
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(34, -16, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#fbcfe8';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.restore();
+
+      ctx.restore();
+    };
+
+    const drawBottle = () => {
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(-10, -5, 20, 28, 5);
+      } else {
+        ctx.rect(-10, -5, 20, 28);
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fffbeb';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(-8, 3, 16, 18, [0, 0, 4, 4]);
+      } else {
+        ctx.rect(-8, 3, 16, 18);
+      }
+      ctx.fill();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(-3, 10, 2.5, Math.PI, 0);
+      ctx.arc(3, 10, 2.5, Math.PI, 0);
+      ctx.lineTo(0, 16);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = '#f472b6';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(-6, 2); ctx.lineTo(-1, 2);
+      ctx.moveTo(-6, 7); ctx.lineTo(-2, 7);
+      ctx.moveTo(-6, 12); ctx.lineTo(-1, 12);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(-8, -10, 16, 5, 2);
+      } else {
+        ctx.rect(-8, -10, 16, 5);
+      }
+      ctx.fill();
+
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(0, -12, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    const drawTeddy = () => {
+      ctx.fillStyle = '#f472b6';
+      ctx.strokeStyle = '#db2777';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(-11, -9, 6.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(11, -9, 6.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(-11, -9, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(11, -9, 3.2, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#fbcfe8';
+      ctx.beginPath();
+      ctx.arc(0, 2, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 5, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#831843';
+      ctx.beginPath(); ctx.arc(-5, 0, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5, 0, 1.8, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath(); ctx.arc(0, 3.5, 2.2, 0, Math.PI * 2); ctx.fill();
+
+      ctx.strokeStyle = '#be185d';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(-2, 7, 2.5, 0.2 * Math.PI, 0.9 * Math.PI);
+      ctx.arc(2, 7, 2.5, 0.1 * Math.PI, 0.8 * Math.PI);
+      ctx.stroke();
+    };
+
+    const drawPacifier = () => {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = 'rgba(244, 114, 182, 0.4)';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(0, 11, 7.5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 15, 9.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(-7, 0, 2.0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(7, 0, 2.0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(0, -9, 6.0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    const drawBow = () => {
+      ctx.fillStyle = '#ec4899';
+      ctx.strokeStyle = '#be185d';
+      ctx.lineWidth = 1.6;
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(-14, -10, -12, 0);
+      ctx.quadraticCurveTo(-14, 10, 0, 0);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(14, -10, 12, 0);
+      ctx.quadraticCurveTo(14, 10, 0, 0);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-2, 2); ctx.lineTo(-10, 16); ctx.lineTo(-5, 14); ctx.lineTo(0, 4);
+      ctx.moveTo(2, 2); ctx.lineTo(10, 16); ctx.lineTo(5, 14); ctx.lineTo(0, 4);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    };
+
+    const drawFootprint = () => {
+      ctx.fillStyle = '#f472b6';
+
+      ctx.beginPath();
+      ctx.ellipse(-6, 3, 4.5, 7.5, 0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath(); ctx.arc(-8.5, -7, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-6.0, -8, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-3.8, -8, 1.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-1.8, -7.5, 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-0.2, -6.5, 0.9, 0, Math.PI * 2); ctx.fill();
+
+      ctx.beginPath();
+      ctx.ellipse(6, 0, 4.5, 7.5, -0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath(); ctx.arc(8.5, -10, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6.0, -11, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3.8, -11, 1.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(1.8, -10.5, 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0.2, -9.5, 0.9, 0, Math.PI * 2); ctx.fill();
+    };
+
+    const drawBalloon = () => {
+      ctx.fillStyle = '#f472b6';
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 1.8;
+
+      ctx.beginPath();
+      ctx.arc(-5.5, -5.5, 5.5, Math.PI, 0);
+      ctx.arc(5.5, -5.5, 5.5, Math.PI, 0);
+      ctx.lineTo(0, 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-2, 9); ctx.lineTo(2, 9); ctx.lineTo(0, 12);
+      ctx.fill();
+
+      ctx.strokeStyle = '#fda4af';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(0, 12);
+      ctx.quadraticCurveTo(6, 18, 0, 24);
+      ctx.quadraticCurveTo(-6, 30, 0, 36);
+      ctx.stroke();
+    };
+
+    const drawBubble = () => {
+      ctx.strokeStyle = '#f472b6';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(0, 0, 14, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(-5, -5, 8, 1.1 * Math.PI, 1.7 * Math.PI);
+      ctx.stroke();
+    };
+
+    const render = () => {
+      t += 1;
+      ctx.clearRect(0, 0, w, h);
+
+      const moonX = w > 768 ? w * 0.88 : w * 0.82;
+      const moonY = h > 600 ? h * 0.14 : 75;
+      drawMoon(moonX, moonY, t);
+
+      for (const c of clouds) {
+        c.x += c.speed;
+        if (c.x - 140 * c.scale > w) {
+          c.x = -160 * c.scale;
+          c.y = Math.random() * h * 0.75;
+        }
+        drawCloud(c.x, c.y, c.scale, c.opacity, true);
+      }
+
+      for (const s of stars) {
+        s.rotation += s.rotSpeed;
+        const twinkle = Math.sin(t * s.twinkleSpeed + s.phase);
+        const alpha = 0.45 + 0.55 * (twinkle * 0.5 + 0.5);
+
+        if (s.isFourPoint) {
+          drawFourPointStar(s.x, s.y, s.size * 2.4, s.color, alpha);
+        } else {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size * 0.8, 0, Math.PI * 2);
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = alpha;
+          ctx.shadowColor = s.color;
+          ctx.shadowBlur = 8;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      for (const d of dreamItems) {
+        d.y -= d.speedY;
+        d.rotation += d.rotSpeed;
+        const wobbleX = d.x + Math.sin(t * d.wobbleSpeed + d.phase) * d.wobbleDist;
+
+        if (d.y < -50) {
+          d.y = h + 50;
+          d.x = Math.random() * w;
+        }
+
+        ctx.save();
+        ctx.translate(wobbleX, d.y);
+        ctx.scale(d.scale, d.scale);
+        ctx.rotate(d.rotation);
+        ctx.globalAlpha = d.opacity;
+        ctx.shadowColor = 'rgba(244, 114, 182, 0.4)';
+        ctx.shadowBlur = 10;
+
+        switch (d.type) {
+          case 'bottle':
+            drawBottle();
+            break;
+          case 'teddy':
+            drawTeddy();
+            break;
+          case 'pacifier':
+            drawPacifier();
+            break;
+          case 'bow':
+            drawBow();
+            break;
+          case 'footprint':
+            drawFootprint();
+            break;
+          case 'balloon':
+            drawBalloon();
+            break;
+          case 'bubble':
+            drawBubble();
+            break;
+          case 'cloud':
+            drawCloud(0, 0, 0.45, 0.9, true);
+            break;
+          default:
+            drawBottle();
+        }
+        ctx.restore();
+      }
+
+      for (let i = stardust.length - 1; i >= 0; i--) {
+        const p = stardust[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+        if (p.life <= 0) {
+          stardust.splice(i, 1);
+          continue;
+        }
+        drawFourPointStar(p.x, p.y, p.size * p.life * 2.0, p.color, p.life * 0.95);
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('pointermove', handlePointerMove);
     };
   }, []);
-  return /*#__PURE__*/(0,react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxDEV)("canvas", {
+
+  return /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxDEV)("canvas", {
     ref: canvasRef,
     style: {
       position: 'fixed',
@@ -3421,10 +3875,8 @@ const BabyFace3D = ({ mood = 'neutral' }) => {
   // Smooth fallback polling if MJPEG drops
   (0, react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     if (useBrowserCam || !snapshotMode) return;
-    const id = setInterval(() => {
-      setFeedSrc('/api/snapshot?t=' + Date.now());
-    }, 120);
-    return () => clearInterval(id);
+    setSnapshotMode(false);
+    setFeedSrc('/video_feed?t=' + Date.now());
   }, [useBrowserCam, snapshotMode]);
 
   return /*#__PURE__*/(0, react_jsx_dev_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxDEV)("div", {
@@ -3459,7 +3911,9 @@ const BabyFace3D = ({ mood = 'neutral' }) => {
         src: feedSrc,
         alt: "Real-Time Neural Video Feed",
         onError: () => {
-          setSnapshotMode(true);
+          setTimeout(() => {
+            setFeedSrc('/video_feed?t=' + Date.now());
+          }, 1000);
         },
         style: {
           width: '100%',
@@ -27517,7 +27971,7 @@ var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBP
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, `.App {
   min-height: 100vh;
-  background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 55%, #000000 100%);
+  background: linear-gradient(135deg, #fff5f8 0%, #fde2ec 28%, #fce7f3 60%, #fff0f5 100%);
   color: #e2e8f0;
   overflow-x: hidden;
 }
@@ -27559,7 +28013,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `.App {
 }
 
 .glass-card {
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.65));
+  background: rgba(255, 255, 255, 0.88); border: 2px solid rgba(244, 114, 182, 0.35); box-shadow: 0 16px 36px rgba(244, 114, 182, 0.16);
   border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 16px;
   backdrop-filter: blur(14px) saturate(140%);
@@ -27638,7 +28092,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `.App {
   .grid-main { grid-template-columns: 1fr; padding: 20px 18px; }
   .foot { flex-direction: column; gap: 8px; text-align: center; padding: 14px 18px; }
 }
-`, "",{"version":3,"sources":["webpack://./src/App.css"],"names":[],"mappings":"AAAA;EACE,iBAAiB;EACjB,kFAAkF;EAClF,cAAc;EACd,kBAAkB;AACpB;;AAEA;EACE,kBAAkB;EAClB,iBAAiB;EACjB,WAAW;AACb;;AAEA;EACE,kBAAkB;EAClB,UAAU;EACV,iBAAiB;EACjB,aAAa;EACb,sBAAsB;AACxB;;AAEA;EACE,uDAAuD;AACzD;;AAEA;EACE,SAAO;EACP,aAAa;EACb,gCAAgC;EAChC,SAAS;EACT,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;EACd,WAAW;EACX,sBAAsB;AACxB;;AAEA;EACE,aAAa;EACb,sBAAsB;EACtB,SAAS;AACX;;AAEA;EACE,mFAAmF;EACnF,2CAA2C;EAC3C,mBAAmB;EACnB,0CAA0C;EAC1C,kDAAkD;EAClD,oFAAoF;EACpF,gBAAgB;EAChB,4BAA4B;AAC9B;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,8BAA8B;EAC9B,kBAAkB;EAClB,kDAAkD;EAClD,kCAAkC;AACpC;;AAEA;EACE,oBAAoB;EACpB,mBAAmB;EACnB,SAAS;EACT,kBAAkB;EAClB,gBAAgB;EAChB,cAAc;AAChB;;AAEA;EACE,kBAAkB;EAClB,cAAc;EACd,sBAAsB;AACxB;;AAEA;EACE,UAAU;EACV,WAAW;EACX,kBAAkB;EAClB,mBAAmB;EACnB,6CAA6C;EAC7C,qBAAqB;AACvB;;AAEA;EACE,iBAAiB;EACjB,mBAAmB;EACnB,2CAA2C;EAC3C,mFAAmF;EACnF,cAAc;EACd,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,gFAAgF;EAChF,mFAAmF;AACrF;AACA;EACE,2BAA2B;EAC3B,qCAAqC;EACrC,kFAAkF;AACpF;;AAEA;EACE,kBAAkB;EAClB,8CAA8C;EAC9C,+BAA+B;EAC/B,2BAA2B;EAC3B,cAAc;EACd,kBAAkB;EAClB,aAAa;EACb,8BAA8B;EAC9B,mBAAmB;EACnB,UAAU;AACZ;AACA,eAAe,cAAc,EAAE,gBAAgB,EAAE;;AAEjD;EACE,aAAa,0BAA0B,EAAE,kBAAkB,EAAE;EAC7D,QAAQ,sBAAsB,EAAE,QAAQ,EAAE,kBAAkB,EAAE,kBAAkB,EAAE;AACpF","sourcesContent":[".App {\n  min-height: 100vh;\n  background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 55%, #000000 100%);\n  color: #e2e8f0;\n  overflow-x: hidden;\n}\n\n.app-shell {\n  position: relative;\n  min-height: 100vh;\n  width: 100%;\n}\n\n.content-wrap {\n  position: relative;\n  z-index: 2;\n  min-height: 100vh;\n  display: flex;\n  flex-direction: column;\n}\n\n.mono {\n  font-family: 'JetBrains Mono', 'Courier New', monospace;\n}\n\n.grid-main {\n  flex: 1;\n  display: grid;\n  grid-template-columns: 1.4fr 1fr;\n  gap: 20px;\n  padding: 24px 32px;\n  max-width: 1400px;\n  margin: 0 auto;\n  width: 100%;\n  box-sizing: border-box;\n}\n\n.col-left, .col-right {\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n}\n\n.glass-card {\n  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.65));\n  border: 1px solid rgba(148, 163, 184, 0.14);\n  border-radius: 16px;\n  backdrop-filter: blur(14px) saturate(140%);\n  -webkit-backdrop-filter: blur(14px) saturate(140%);\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);\n  overflow: hidden;\n  transform-style: preserve-3d;\n}\n\n.card-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 14px 20px;\n  border-bottom: 1px solid rgba(148, 163, 184, 0.08);\n  background: rgba(15, 23, 42, 0.35);\n}\n\n.card-title {\n  display: inline-flex;\n  align-items: center;\n  gap: 10px;\n  font-size: 0.92rem;\n  font-weight: 600;\n  color: #e2e8f0;\n}\n\n.card-subtle {\n  font-size: 0.72rem;\n  color: #64748b;\n  letter-spacing: 0.14em;\n}\n\n.dot-cyan {\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n  background: #00d4ff;\n  box-shadow: 0 0 12px #00d4ff, 0 0 4px #00d4ff;\n  display: inline-block;\n}\n\n.btn-mini {\n  padding: 8px 16px;\n  border-radius: 10px;\n  border: 1px solid rgba(148, 163, 184, 0.25);\n  background: linear-gradient(180deg, rgba(51, 65, 85, 0.65), rgba(30, 41, 59, 0.65));\n  color: #e2e8f0;\n  font-size: 0.8rem;\n  cursor: pointer;\n  font-weight: 500;\n  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;\n  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);\n}\n.btn-mini:hover {\n  transform: translateY(-2px);\n  border-color: rgba(56, 189, 248, 0.5);\n  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);\n}\n\n.foot {\n  padding: 14px 32px;\n  border-top: 1px solid rgba(148, 163, 184, 0.1);\n  background: rgba(2, 6, 23, 0.5);\n  backdrop-filter: blur(10px);\n  color: #64748b;\n  font-size: 0.78rem;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  z-index: 3;\n}\n.foot strong { color: #94a3b8; font-weight: 600; }\n\n@media (max-width: 1024px) {\n  .grid-main { grid-template-columns: 1fr; padding: 20px 18px; }\n  .foot { flex-direction: column; gap: 8px; text-align: center; padding: 14px 18px; }\n}\n"],"sourceRoot":""}]);
+`, "",{"version":3,"sources":["webpack://./src/App.css"],"names":[],"mappings":"AAAA;EACE,iBAAiB;EACjB,kFAAkF;EAClF,cAAc;EACd,kBAAkB;AACpB;;AAEA;EACE,kBAAkB;EAClB,iBAAiB;EACjB,WAAW;AACb;;AAEA;EACE,kBAAkB;EAClB,UAAU;EACV,iBAAiB;EACjB,aAAa;EACb,sBAAsB;AACxB;;AAEA;EACE,uDAAuD;AACzD;;AAEA;EACE,SAAO;EACP,aAAa;EACb,gCAAgC;EAChC,SAAS;EACT,kBAAkB;EAClB,iBAAiB;EACjB,cAAc;EACd,WAAW;EACX,sBAAsB;AACxB;;AAEA;EACE,aAAa;EACb,sBAAsB;EACtB,SAAS;AACX;;AAEA;EACE,mFAAmF;EACnF,2CAA2C;EAC3C,mBAAmB;EACnB,0CAA0C;EAC1C,kDAAkD;EAClD,oFAAoF;EACpF,gBAAgB;EAChB,4BAA4B;AAC9B;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,8BAA8B;EAC9B,kBAAkB;EAClB,kDAAkD;EAClD,kCAAkC;AACpC;;AAEA;EACE,oBAAoB;EACpB,mBAAmB;EACnB,SAAS;EACT,kBAAkB;EAClB,gBAAgB;EAChB,cAAc;AAChB;;AAEA;EACE,kBAAkB;EAClB,cAAc;EACd,sBAAsB;AACxB;;AAEA;EACE,UAAU;EACV,WAAW;EACX,kBAAkB;EAClB,mBAAmB;EACnB,6CAA6C;EAC7C,qBAAqB;AACvB;;AAEA;EACE,iBAAiB;EACjB,mBAAmB;EACnB,2CAA2C;EAC3C,mFAAmF;EACnF,cAAc;EACd,iBAAiB;EACjB,eAAe;EACf,gBAAgB;EAChB,gFAAgF;EAChF,mFAAmF;AACrF;AACA;EACE,2BAA2B;EAC3B,qCAAqC;EACrC,kFAAkF;AACpF;;AAEA;EACE,kBAAkB;EAClB,8CAA8C;EAC9C,+BAA+B;EAC/B,2BAA2B;EAC3B,cAAc;EACd,kBAAkB;EAClB,aAAa;EACb,8BAA8B;EAC9B,mBAAmB;EACnB,UAAU;AACZ;AACA,eAAe,cAAc,EAAE,gBAAgB,EAAE;;AAEjD;EACE,aAAa,0BAA0B,EAAE,kBAAkB,EAAE;EAC7D,QAAQ,sBAAsB,EAAE,QAAQ,EAAE,kBAAkB,EAAE,kBAAkB,EAAE;AACpF","sourcesContent":[".App {\n  min-height: 100vh;\n  background: linear-gradient(135deg, #fff5f8 0%, #fde2ec 28%, #fce7f3 60%, #fff0f5 100%);\n  color: #e2e8f0;\n  overflow-x: hidden;\n}\n\n.app-shell {\n  position: relative;\n  min-height: 100vh;\n  width: 100%;\n}\n\n.content-wrap {\n  position: relative;\n  z-index: 2;\n  min-height: 100vh;\n  display: flex;\n  flex-direction: column;\n}\n\n.mono {\n  font-family: 'JetBrains Mono', 'Courier New', monospace;\n}\n\n.grid-main {\n  flex: 1;\n  display: grid;\n  grid-template-columns: 1.4fr 1fr;\n  gap: 20px;\n  padding: 24px 32px;\n  max-width: 1400px;\n  margin: 0 auto;\n  width: 100%;\n  box-sizing: border-box;\n}\n\n.col-left, .col-right {\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n}\n\n.glass-card {\n  background: rgba(255, 255, 255, 0.88); border: 2px solid rgba(244, 114, 182, 0.35); box-shadow: 0 16px 36px rgba(244, 114, 182, 0.16);\n  border: 1px solid rgba(148, 163, 184, 0.14);\n  border-radius: 16px;\n  backdrop-filter: blur(14px) saturate(140%);\n  -webkit-backdrop-filter: blur(14px) saturate(140%);\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);\n  overflow: hidden;\n  transform-style: preserve-3d;\n}\n\n.card-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 14px 20px;\n  border-bottom: 1px solid rgba(148, 163, 184, 0.08);\n  background: rgba(15, 23, 42, 0.35);\n}\n\n.card-title {\n  display: inline-flex;\n  align-items: center;\n  gap: 10px;\n  font-size: 0.92rem;\n  font-weight: 600;\n  color: #e2e8f0;\n}\n\n.card-subtle {\n  font-size: 0.72rem;\n  color: #64748b;\n  letter-spacing: 0.14em;\n}\n\n.dot-cyan {\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n  background: #00d4ff;\n  box-shadow: 0 0 12px #00d4ff, 0 0 4px #00d4ff;\n  display: inline-block;\n}\n\n.btn-mini {\n  padding: 8px 16px;\n  border-radius: 10px;\n  border: 1px solid rgba(148, 163, 184, 0.25);\n  background: linear-gradient(180deg, rgba(51, 65, 85, 0.65), rgba(30, 41, 59, 0.65));\n  color: #e2e8f0;\n  font-size: 0.8rem;\n  cursor: pointer;\n  font-weight: 500;\n  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;\n  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);\n}\n.btn-mini:hover {\n  transform: translateY(-2px);\n  border-color: rgba(56, 189, 248, 0.5);\n  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);\n}\n\n.foot {\n  padding: 14px 32px;\n  border-top: 1px solid rgba(148, 163, 184, 0.1);\n  background: rgba(2, 6, 23, 0.5);\n  backdrop-filter: blur(10px);\n  color: #64748b;\n  font-size: 0.78rem;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  z-index: 3;\n}\n.foot strong { color: #94a3b8; font-weight: 600; }\n\n@media (max-width: 1024px) {\n  .grid-main { grid-template-columns: 1fr; padding: 20px 18px; }\n  .foot { flex-direction: column; gap: 8px; text-align: center; padding: 14px 18px; }\n}\n"],"sourceRoot":""}]);
 // Exports
 ___CSS_LOADER_EXPORT___.locals = {};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);

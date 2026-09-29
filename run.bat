@@ -10,7 +10,8 @@ echo.
 
 if not exist "venv\Scripts\python.exe" (
     echo Virtual environment not detected! Creating one now...
-    py -3.10 -m venv venv || "C:\ProgramData\anaconda3\python.exe" -m venv venv
+    py -3.11 -m venv venv || py -3.10 -m venv venv || py -3 -m venv venv || python -m venv venv
+    call .\venv\Scripts\pip.exe install --upgrade pip
     call .\venv\Scripts\pip.exe install -r requirements.txt
 )
 

@@ -1,0 +1,292 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #5b5de6;
+  --primary-dark: #4547c9;
+  --text: #24243a;
+  --muted: #707087;
+  --white: #ffffff;
+  --border: #dedff0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Baby photo background.
+   Replace the URL below with your own local baby.jpg if preferred:
+   background-image: url("baby.jpg");
+*/
+.login-page,
+.register-page {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(120deg, rgba(22, 25, 65, 0.58), rgba(88, 69, 120, 0.35)),
+    url("https://images.unsplash.com/photo-1544126592-807ade215a0b?auto=format&fit=crop&w=2000&q=85");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  position: relative;
+}
+
+.background-overlay {
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+/* ---------- LOGIN POP-UP ---------- */
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: min(430px, 100%);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 24px;
+  padding: 36px 34px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.30);
+  animation: popup 0.55s ease;
+}
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.brand-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #eeeefe;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  margin: 0 auto 14px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.input-group {
+  margin-bottom: 18px;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 14px;
+  outline: none;
+  font-size: 15px;
+  background: #fafaff;
+  transition: 0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(91, 93, 230, 0.10);
+  background: white;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 20px;
+  font-size: 13px;
+}
+
+.remember,
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  color: var(--muted);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 50px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.primary-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #aaaabc;
+  font-size: 12px;
+  margin: 22px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  background: #e3e3ee;
+  flex: 1;
+}
+
+.register-text,
+.login-link {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ---------- REGISTRATION FORM ---------- */
+
+.registration-container {
+  position: relative;
+  z-index: 2;
+  width: min(760px, 100%);
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 22px;
+  padding: 34px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.28);
+  animation: formIn 0.55s ease;
+}
+
+@keyframes formIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.registration-header {
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.registration-header .brand-icon {
+  margin-bottom: 12px;
+}
+
+.registration-header h1 {
+  margin-bottom: 7px;
+}
+
+.registration-header p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.registration-form {
+  max-width: 650px;
+  margin: auto;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.terms {
+  font-size: 13px;
+  margin: 5px 0 20px;
+}
+
+.message {
+  min-height: 20px;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.login-link {
+  margin-top: 18px;
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 650px) {
+  .registration-container {
+    padding: 26px 20px;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .login-card {
+    padding: 30px 22px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .login-page,
+  .register-page {
+    background-attachment: scroll;
+  }
+}

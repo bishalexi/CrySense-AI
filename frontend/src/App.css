@@ -5,8 +5,13 @@ var ___CSS_LOADER_EXPORT___ = ___CSS_LOADER_API_IMPORT___(___CSS_LOADER_API_SOUR
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, `.App {
   min-height: 100vh;
-  background: radial-gradient(ellipse at top, #1e1b4b 0%, #020617 55%, #000000 100%);
-  color: #e2e8f0;
+  background-color: #fff5f8;
+  background-image: url('/static/baby_bg.jpg');
+  background-repeat: repeat;
+  background-size: 380px auto;
+  background-attachment: fixed;
+  background-position: top center;
+  color: #1e293b;
   overflow-x: hidden;
 }
 
@@ -47,8 +52,8 @@ ___CSS_LOADER_EXPORT___.push([module.id, `.App {
 }
 
 .glass-card {
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.65));
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: linear-gradient(180deg, rgba(34, 44, 76, 0.62), rgba(17, 23, 48, 0.72));
+  border: 1px solid rgba(199, 210, 254, 0.16);
   border-radius: 16px;
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);

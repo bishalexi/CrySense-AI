@@ -39,13 +39,25 @@ class EmotionClassifier:
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model not found at: {model_path}. Run download_models.py first.")
             
-        # Initialize OpenCV DNN network
-        self.net = cv2.dnn.readNetFromONNX(model_path)
-        self.out_name = self.net.getUnconnectedOutLayersNames()[0]
-        
         # Temporal smoothing coefficient (1.0 = no smoothing, lower = smoother)
         self.smoothing_alpha = smoothing_alpha
         self.prev_probs = None
+        
+        # Try initializing with high-performance ONNX Runtime, fallback to OpenCV DNN
+        self.use_ort = False
+        try:
+            import onnxruntime as ort
+            sess_options = ort.SessionOptions()
+            sess_options.intra_op_num_threads = 4
+            sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+            sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+            self.session = ort.InferenceSession(model_path, sess_options, providers=['CPUExecutionProvider'])
+            self.input_name = self.session.get_inputs()[0].name
+            self.output_name = self.session.get_outputs()[0].name
+            self.use_ort = True
+        except Exception:
+            self.net = cv2.dnn.readNetFromONNX(model_path)
+            self.out_name = self.net.getUnconnectedOutLayersNames()[0]
 
     def _softmax(self, x: np.ndarray) -> np.ndarray:
         e_x = np.exp(x - np.max(x))
@@ -87,8 +99,11 @@ class EmotionClassifier:
             }
             
         blob = self._preprocess(face_bgr)
-        self.net.setInput(blob)
-        raw_output = self.net.forward(self.out_name)
+        if self.use_ort:
+            raw_output = self.session.run([self.output_name], {self.input_name: blob})[0]
+        else:
+            self.net.setInput(blob)
+            raw_output = self.net.forward(self.out_name)
         
         # Softmax over logits
         probs = self._softmax(raw_output)[0]

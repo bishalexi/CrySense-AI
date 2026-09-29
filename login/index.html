@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BabyCry Sense AI - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+  <div class="background-overlay"></div>
+
+  <main class="login-card">
+    <div class="brand-icon">👶</div>
+    <h1>BabyCry Sense AI</h1>
+    <p class="subtitle">Baby Cry Detection & Monitoring System</p>
+
+    <form id="loginForm">
+      <div class="input-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+      </div>
+
+      <div class="input-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+      </div>
+
+      <div class="form-row">
+        <label class="remember">
+          <input type="checkbox" id="rememberMe">
+          <span>Remember me</span>
+        </label>
+        <a href="#" onclick="forgotPassword(event)">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="primary-btn">Login</button>
+      <p id="loginMessage" class="message"></p>
+    </form>
+
+    <div class="divider"><span>OR</span></div>
+
+    <p class="register-text">
+      Don't have an account?
+      <a href="register.html">Create Account</a>
+    </p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
